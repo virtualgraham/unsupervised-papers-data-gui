@@ -24,7 +24,7 @@ async function extractItemsFromDirFiles(dirFiles, type, area) {
     const items = []
     for(const f of dirFiles) {
       if(f.children) {
-        items.push(...(await extractItemsFromDirFiles(f.children, area)))
+        items.push(...(await extractItemsFromDirFiles(f.children, type, area)))
       } else {
         if(f.name.endsWith('.md')) {
           const path = f.path.split('/')
@@ -98,6 +98,10 @@ export default new Vuex.Store({
         Vue.set(state.openItems, name, JSON.parse(JSON.stringify(state[type][name])))
       }
     },
+    closeItem (state, name) {
+      console.log('close item', name)
+      Vue.delete(state.openItems, name)
+    },
     setDataDir (state, value) {
       state.dataDir = value
     },
@@ -129,11 +133,21 @@ export default new Vuex.Store({
       if(state.openItems[name] && state.openItems[name].frontmatter) {
         Vue.set(state.openItems[name].frontmatter, field, value)
       } else {
-        console.error('unable to set frontmatter field', {type, name, field, value})
+        console.error('unable to set frontmatter field', {name, field, value})
+      }
+    },
+    setContent (state, {name, value}) {
+      if(state.openItems[name]) {
+        Vue.set(state.openItems[name], 'content', value)
+      } else {
+        console.error('unable to set content', {name, value})
       }
     }
   },
   actions: {
+    async saveItem ({ commit, state }, name) {
+      console.log("save item", name)
+    },
     async loadData ({ commit, state }) {
       const tasks = await readTasks(state.dataDir)
       const methods = await readMethods(state.dataDir)

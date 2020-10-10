@@ -1,5 +1,6 @@
 <template>
-  <div id="app-inner">
+  <v-app>
+    <div id="app-inner">
     <div class="left-accordian">
       <v-expansion-panels accordion class="pa-0">
         <v-expansion-panel class="pa-0">
@@ -66,24 +67,27 @@
           :key="tab.name"
         >
           <v-card flat>
-            <v-card-text v-text="tab.frontmatter.title"></v-card-text>
+            <ItemEditor :name="tab.name" />
           </v-card>
         </v-tab-item>
       </v-tabs-items>
 
     </div>
-  </div>
+    </div>
+  </v-app>
 </template>
 
 <script>
   import Settings from './components/Settings.vue'
   import ItemList from './components/ItemList.vue'
+  import ItemEditor from './components/ItemEditor.vue'
 
   export default {
     name: "app",
     components: {
       Settings,
-      ItemList
+      ItemList,
+      ItemEditor
     },
     data() {
       return {
