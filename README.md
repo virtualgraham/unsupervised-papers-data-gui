@@ -1,24 +1,13 @@
 # unsupervised-papers-data-gui
 
-## Project setup
-```
-npm install
-```
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+### Start dev server with HMR
+`npm run tauri:serve`
 
-### Compiles and minifies for production
-```
-npm run build
-```
+### Build executable
+`npm run tauri:build`
 
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+[vuetify](https://vuetifyjs.com/en/components/expansion-panels/)  
+[Tauri API](https://tauri.studio/en/docs/api/js)  
+[Tauri VUE Plugin](https://github.com/tauri-apps/vue-cli-plugin-tauri)   
+[gray-matter](https://github.com/jonschlinkert/gray-matter)
