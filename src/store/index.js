@@ -95,7 +95,7 @@ export default new Vuex.Store({
   mutations: {
     openItem (state, {type, name}) {
       if(state[type] && state[type][name]) {
-        state.openItems[name] = JSON.parse(JSON.stringify(state[type][name]))
+        Vue.set(state.openItems, name, JSON.parse(JSON.stringify(state[type][name])))
       }
     },
     setDataDir (state, value) {
@@ -125,6 +125,13 @@ export default new Vuex.Store({
     setLoaded (state, value) {
       state.loaded = value
     },
+    setFrontmatterField (state, {name, field, value}) {
+      if(state.openItems[name] && state.openItems[name].frontmatter) {
+        Vue.set(state.openItems[name].frontmatter, field, value)
+      } else {
+        console.error('unable to set frontmatter field', {type, name, field, value})
+      }
+    }
   },
   actions: {
     async loadData ({ commit, state }) {

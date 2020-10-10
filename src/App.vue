@@ -1,13 +1,13 @@
 <template>
   <div id="app-inner">
     <div class="left-accordian">
-      <v-expansion-panels accordion>
-        <v-expansion-panel>
-          <v-expansion-panel-header>
+      <v-expansion-panels accordion class="pa-0">
+        <v-expansion-panel class="pa-0">
+          <v-expansion-panel-header class="pa-0">
             Tasks
           </v-expansion-panel-header>
-          <v-expansion-panel-content>
-            Tasks
+          <v-expansion-panel-content class="pa-0">
+            <ItemList itemType="tasks" />
           </v-expansion-panel-content>
         </v-expansion-panel>
         <v-expansion-panel>
@@ -15,7 +15,7 @@
             Methods
           </v-expansion-panel-header>
           <v-expansion-panel-content>
-            Methods
+            <ItemList itemType="methods" />
           </v-expansion-panel-content>
         </v-expansion-panel>
         <v-expansion-panel>
@@ -23,7 +23,7 @@
             Categories
           </v-expansion-panel-header>
           <v-expansion-panel-content>
-            Categories
+            <ItemList itemType="categories" />
           </v-expansion-panel-content>
         </v-expansion-panel>
         <v-expansion-panel>
@@ -31,7 +31,7 @@
             Papers
           </v-expansion-panel-header>
           <v-expansion-panel-content>
-            Papers
+            <ItemList itemType="papers" />
           </v-expansion-panel-content>
         </v-expansion-panel>
       </v-expansion-panels>
@@ -57,7 +57,7 @@
           key="__settings__"
         >
           <v-card flat>
-            <v-card-text>Settings</v-card-text>
+            <Settings/>
           </v-card>
         </v-tab-item>
 
@@ -76,9 +76,14 @@
 </template>
 
 <script>
+  import Settings from './components/Settings.vue'
+  import ItemList from './components/ItemList.vue'
+
   export default {
     name: "app",
     components: {
+      Settings,
+      ItemList
     },
     data() {
       return {
@@ -91,22 +96,31 @@
         return (str.length > n) ? str.substr(0, n-1) + '&hellip;' : str;
       }
     },
+    watch: {
+      openItems (val) {
+        console.log('watch openItems')
+        this.tab = val.length
+      },
+      tab (val) {
+        console.log('tab', val)
+      },
+    },
     computed: {
-      papers: function() {
-        const self = this
-        return Object.values(this.$store.state.papers).reduce(function(filtered, item) {
-          if (self.paperFilter.length == 0 || item.frontmatter.title.toLowerCase().includes(self.paperFilter.toLowerCase())) {
-            filtered.push({ 
-              name: item.name, 
-              title: item.frontmatter.title, 
-            });
-          }
-          return filtered;
-        }, []);
-      },
-      paperCount: function() {
-        return this.papers.length
-      },
+      // papers: function() {
+      //   const self = this
+      //   return Object.values(this.$store.state.papers).reduce(function(filtered, item) {
+      //     if (self.paperFilter.length == 0 || item.frontmatter.title.toLowerCase().includes(self.paperFilter.toLowerCase())) {
+      //       filtered.push({ 
+      //         name: item.name, 
+      //         title: item.frontmatter.title, 
+      //       });
+      //     }
+      //     return filtered;
+      //   }, []);
+      // },
+      // paperCount: function() {
+      //   return this.papers.length
+      // },
       openItems: function() {
         return Object.values(this.$store.state.openItems)
       },
@@ -140,8 +154,12 @@
 }
 
 .v-expansion-panel-content__wrap {
+  padding: 0 !important;
   height: calc(100vh - 210px);
 }
 
+.v-expansion-panel--active > .v-expansion-panel-header {
+  min-height: 48px !important;
+}
 
 </style>
