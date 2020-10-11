@@ -105,7 +105,7 @@
             v-for="tab in tabs"
             :key="tab.name"
           >
-            <span v-if="tab.name != '__settings__'">{{ tab.frontmatter.title }}</span>
+            <span v-if="tab.name != '__settings__'" class="overline" style="line-height: 15px">{{ tab.frontmatter.title }}</span>
             <v-icon v-if="tab.name == '__settings__'">mdi-cog-outline</v-icon>
           </v-tab>
         </v-tabs>
@@ -131,6 +131,56 @@
 
     </div>
     </div>
+
+    <v-dialog
+      v-model="dialogOpen"
+      persistent
+      max-width="290"
+      @click:outside="closeDialog(false)"
+    >
+      <v-card>
+        <v-card-title class="headline">
+          Confirm
+        </v-card-title>
+        <v-card-text>{{dialogMessage}}</v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="green darken-1"
+            text
+            @click="closeDialog(false)"
+          >
+            Cancel
+          </v-btn>
+          <v-btn
+            color="green darken-1"
+            text
+            @click="closeDialog(true)"
+          >
+            Continue
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+        
+    <v-snackbar
+      v-model="snackbarOpen"
+    >
+      {{snackbarMessage}}
+
+      <template v-slot:action="{ attrs }">
+        <v-btn
+          color="pink"
+          text
+          v-bind="attrs"
+          @click="snackbarOpen=false"
+        >
+          Close
+        </v-btn>
+      </template>
+    </v-snackbar>
+
+
   </v-app>
 </template>
 
@@ -153,6 +203,11 @@
       }
     },
     methods: {
+      closeDialog(value) {
+        const callback = this.$store.state.dialogCallback
+        this.$store.commit('closeDialog', value); 
+        if(callback) setTimeout(callback(value))
+      },
       panelOpened(r) {
         this.$refs[r].opened()
       },
@@ -178,14 +233,39 @@
     },
     watch: {
       openItems (val) {
-        console.log('watch openItems')
         this.tab = val.length
-      },
-      tab (val) {
-        console.log('tab', val)
-      },
+      }
     },
     computed: {
+      snackbarOpen: {
+        get() {
+          return this.$store.state.snackbarOpen
+        },
+        set(value) {
+          if(!value) {
+            this.$store.commit('closeSnackbar'); 
+          }
+        }
+      },
+      snackbarMessage() {
+        return this.$store.state.snackbarMessage
+      },
+      dialogOpen: {
+        get() {
+          return this.$store.state.dialogOpen
+        },
+        set(value) {
+          if(!value) {
+            this.$store.commit('closeDialog'); 
+          }
+        }
+      },
+      dialogMessage() {
+        return this.$store.state.dialogMessage
+      },
+      dialogCallback() {
+        return this.$store.state.dialogCallback
+      },
       loaded() {
         return this.$store.state.loaded
       },

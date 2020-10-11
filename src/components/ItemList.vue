@@ -48,11 +48,9 @@ export default {
     },
     methods: {
         openItem(name) {
-            console.log('openItem', {type: this.itemType, name: name})
             this.$store.commit('openItem', {type: this.itemType, name: name}); 
         },
         opened() {
-            console.log("ItemList opened")
             const self = this
             setTimeout(function () {
                 self.$refs.vscroll.onScroll()

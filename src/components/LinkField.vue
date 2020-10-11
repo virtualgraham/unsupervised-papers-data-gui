@@ -82,10 +82,6 @@ export default {
       })
     },
     update() {
-      console.log('this.$refs.titleField.value', this.$refs.titleField.value)
-      console.log('this.$refs.typeField.value', this.$refs.typeField.value)
-      console.log('this.$refs.urlField.value', this.$refs.urlField.value)
-
       this.$emit("input", {
         title: this.$refs.titleField.value,
         type: this.$refs.typeField.value,

@@ -83,7 +83,6 @@ async function readPapers(dataDir) {
 
 function getAreas(items) {
   const areasSet = new Set(Object.values(items).map(item => {
-    console.log('item', item)
     return item.frontmatter.area
   }))
   return [...areasSet]
@@ -115,6 +114,13 @@ export default new Vuex.Store({
     papers: {},
     loaded: false,
     openItems: {},
+
+    snackbarOpen: false,
+    snackbarMessage: '',
+    dialogOpen: false,
+    dialogMessage: '',
+    dialogCallback: null
+
   },
   mutations: {
     removeItem(state, {type, name}) {
@@ -217,8 +223,34 @@ export default new Vuex.Store({
         Vue.set(state.openItems, name, JSON.parse(JSON.stringify(state[type][name])))
       }
     },
+
+
+    openSnackbar(state, message) {
+      state.snackbarOpen = true
+      state.snackbarMessage = message
+    },
+
+    closeSnackbar(state) {
+      state.snackbarOpen = false
+      state.snackbarMessage = ''
+    },
+
+    openDialog (state, {message, callback}) {
+      state.dialogOpen = true
+      state.dialogMessage = message
+      state.dialogCallback = callback
+    },
+
+    closeDialog (state) {
+      state.dialogOpen = false
+      state.dialogMessage = ''
+      state.dialogCallback = null
+    },
+
+
+
+
     closeItem (state, name) {
-      console.log('close item', name)
       Vue.delete(state.openItems, name)
     },
     setPdfFiles (state, value) {
@@ -253,7 +285,6 @@ export default new Vuex.Store({
     },
     setFrontmatterField (state, {name, field, value}) {
       if(state.openItems[name] && state.openItems[name].frontmatter) {
-        console.log('setFrontmatterField', state.openItems[name].frontmatter, field, value, state.openItems[name].frontmatter[field])
         Vue.set(state.openItems[name].frontmatter, field, value)
       } else {
         console.error('unable to set frontmatter field', {name, field, value})
@@ -269,17 +300,15 @@ export default new Vuex.Store({
   },
   actions: {
     async openPdf ({ commit, state }, name) {
-      console.log("open PDF", name)
-
       if (!state.pdfDir) return
       await execute('open', `${state.pdfDir}/${name}.pdf`)
-
-      
     },
+
     async removeItem ({ commit, state }, name) {
       const type = state.openItems[name].type
       commit('removeItem', {type, name})
     },
+
     async saveItem ({ commit, state }, {name, close}) {
       commit('saveItem', {name, close})
     },
@@ -288,7 +317,6 @@ export default new Vuex.Store({
 
       if(state.pdfDir) {
         const pdfFiles = await readPdfs(state.pdfDir)
-        console.log('pdfFiles', pdfFiles)
         commit('setPdfFiles', pdfFiles)
       }
 
@@ -309,15 +337,6 @@ export default new Vuex.Store({
       commit('setTaskAreas', taskAreas)
 
       commit('setLoaded', true)
-
-      console.log({
-        tasks,
-        taskAreas,
-        methods,
-        categories,
-        methodAreas,
-        papers
-      })
     }
   },
   modules: {

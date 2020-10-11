@@ -294,39 +294,8 @@
 
     </v-container>
 
-    <v-snackbar
-      v-model="copiedSnackbar"
-    >
-      Copied to clipboard
 
-      <template v-slot:action="{ attrs }">
-        <v-btn
-          color="pink"
-          text
-          v-bind="attrs"
-          @click="snackbar = false"
-        >
-          Close
-        </v-btn>
-      </template>
-    </v-snackbar>
 
-    <v-snackbar
-      v-model="copyFailedSnackbar"
-    >
-      Unable to copy to clipboard
-
-      <template v-slot:action="{ attrs }">
-        <v-btn
-          color="pink"
-          text
-          v-bind="attrs"
-          @click="snackbar = false"
-        >
-          Close
-        </v-btn>
-      </template>
-    </v-snackbar>
 
   </v-form>
 
@@ -342,12 +311,10 @@ function computeFrontmatterProperty(field, {get, set}={get: undefined, set: unde
     return {
       get: function() { 
           const v = this.$store.state.openItems[this.name].frontmatter[field]; 
-          console.log('get computeFrontmatterProperty', this.name, field, v)
           return get ? get(v) : v
       }, 
       set: function(value) { 
           const v = set ? set(value) : value
-          console.log('set computeFrontmatterProperty', this.name, field, v)
           this.$store.commit('setFrontmatterField', {name: this.name, field, value: v}); 
       }
     }
@@ -377,8 +344,6 @@ export default {
   },
   data() {
     return {
-      copiedSnackbar: false,
-      copyFailedSnackbar: false
     }
   },
   methods: {
@@ -386,7 +351,15 @@ export default {
       this.$store.dispatch('openPdf', this.name)
     },
     remove() {
-      this.$store.dispatch('removeItem', this.name)
+      const self = this
+      this.$store.commit('openDialog', {
+        message: `Permanently remove ${self.itemType}?`,
+        callback: (value)=>{
+          if(value) {
+            self.$store.dispatch('removeItem', this.name)
+          }
+        }
+      });
     },
     close() {
       this.$store.commit('closeItem', this.name);
@@ -400,15 +373,14 @@ export default {
     async copyName() {
       try {
         await navigator.clipboard.writeText(this.titleKebob)
-        this.copiedSnackbar = true
+        this.$store.commit('openSnackbar', "Copied to clipboard");
       } catch {
-        this.copyFailedSnackbar = true
+        this.$store.commit('openSnackbar', "Unable to copy");
       }
     }
   },
   computed:{
     hasPdf() {
-      console.log('hasPdf', `${this.name}.pdf`, this.$store.state.pdfFiles, this.$store.state.pdfFiles[`${this.name}.pdf`])
       return this.itemType == 'paper' && this.$store.state.pdfFiles[`${this.name}.pdf`]
     },
 
@@ -482,14 +454,12 @@ export default {
 
     area: computeFrontmatterProperty('area', {
       get(value) {
-        console.log('area get computeFrontmatterProperty', value)
         return {
           text: decodeKebobCase(value),
           value: value
         }
       },
       set(value) {
-        console.log('area set computeFrontmatterProperty', value)
         if(typeof value === 'object' && value !== null) {
           return value.value
         }
