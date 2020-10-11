@@ -9,5 +9,4 @@
 
 [vuetify](https://vuetifyjs.com/en/components/expansion-panels/)  
 [Tauri API](https://tauri.studio/en/docs/api/js)  
-[Tauri VUE Plugin](https://github.com/tauri-apps/vue-cli-plugin-tauri)   
 [gray-matter](https://github.com/jonschlinkert/gray-matter)

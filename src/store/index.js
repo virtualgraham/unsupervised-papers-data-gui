@@ -131,6 +131,7 @@ export default new Vuex.Store({
     },
     setFrontmatterField (state, {name, field, value}) {
       if(state.openItems[name] && state.openItems[name].frontmatter) {
+        console.log('setFrontmatterField', state.openItems[name].frontmatter, field, value, state.openItems[name].frontmatter[field])
         Vue.set(state.openItems[name].frontmatter, field, value)
       } else {
         console.error('unable to set frontmatter field', {name, field, value})

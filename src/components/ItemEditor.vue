@@ -7,17 +7,6 @@
         </v-col>
       </v-row>
 
-      <!-- Area (Need to also add new area) -->
-      <v-row v-if="itemType == 'task' || itemType == 'category'">
-        <v-col cols="12">
-          <v-autocomplete
-            label="Area"
-            :items="areas"
-            v-model="area"
-          ></v-autocomplete>
-        </v-col>
-      </v-row>
-
       <!-- Title -->
       <v-row>
         <v-col cols="12">
@@ -26,6 +15,29 @@
             label="Title"
             type="text"
           ></v-text-field>
+        </v-col>
+      </v-row>
+
+      <!-- Name -->
+      <v-row>
+        <v-col cols="12">
+          <v-text-field
+            v-model="titleKebob"
+            label="Name"
+            type="text"
+            readonly
+          ></v-text-field>
+        </v-col>
+      </v-row>
+
+      <!-- Area (Need to also add new area) -->
+      <v-row v-if="itemType == 'task' || itemType == 'category'">
+        <v-col cols="12">
+          <v-autocomplete
+            label="Area"
+            :items="areaItems"
+            v-model="area"
+          ></v-autocomplete>
         </v-col>
       </v-row>
      
@@ -59,6 +71,7 @@
             deletable-chips
             multiple
             label="Categories"
+            :items="categoryItems"
             v-model="categories"
           ></v-autocomplete>
         </v-col>
@@ -73,6 +86,7 @@
             multiple
             label="Categories"
             v-model="components"
+            :items="methodItems"
           ></v-autocomplete>
         </v-col>
       </v-row>
@@ -81,8 +95,9 @@
       <v-row v-if="itemType == 'method'">
         <v-col cols="12">
            <v-autocomplete
-            label="Categories"
+            label="Introduced By"
             v-model="introduced_by"
+            :items="paperItems"
           ></v-autocomplete>
         </v-col>
       </v-row>
@@ -93,6 +108,7 @@
           <v-autocomplete
             label="Parent Task"
             v-model="parent_task"
+            :items="taskItems"
           ></v-autocomplete>
         </v-col>
       </v-row>
@@ -127,6 +143,7 @@
           <v-autocomplete
             label="Supervision"
             v-model="supervision"
+            :items="supervisionItems"
           ></v-autocomplete>
         </v-col>
       </v-row>
@@ -140,6 +157,7 @@
             multiple
             label="Tasks"
             v-model="tasks"
+            :items="taskItems"
           ></v-autocomplete>
         </v-col>
       </v-row>
@@ -153,6 +171,7 @@
             multiple
             label="Methods"
             v-model="methods"
+            :items="methodItems"
           ></v-autocomplete>
         </v-col>
       </v-row>
@@ -225,13 +244,17 @@
 
 <script>
 
-function computeFrontmatterProperty(field) {
+function computeFrontmatterProperty(field, {get, set}={get: undefined, set: undefined}) {
     return {
-      get: function(){ 
-          return this.$store.state.openItems[this.name].frontmatter[field]; 
+      get: function() { 
+          const v = this.$store.state.openItems[this.name].frontmatter[field]; 
+          console.log('get computeFrontmatterProperty', this.name, field, v)
+          return get ? get(v) : v
       }, 
-      set: function(value){ 
-          this.$store.commit('setFrontmatterField', {name: this.name, field, value}); 
+      set: function(value) { 
+          const v = set ? set(value) : value
+          console.log('set computeFrontmatterProperty', this.name, field, v)
+          this.$store.commit('setFrontmatterField', {name: this.name, field, value: v}); 
       }
     }
 }
@@ -241,6 +264,10 @@ function decodeKebobCase(str) {
         return ''
     }
     return str.split('-').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ')
+}
+
+function encodeKebobCase(str) {
+    return str.replace(/[^0-9a-zA-Z]+/g, ' ').trim().replace(/([a-z])([A-Z])/g, '$1-$2').replace(/[-\s]+/g, '-').toLowerCase()
 }
 
 export default {
@@ -263,10 +290,63 @@ export default {
   },
   computed:{
 
-    areas() {
+    supervisionItems() {
+      return [
+        {
+          text: 'Unsupervised',
+          value: 'unsupervised'
+        },
+        {
+          text: 'Self-supervised',
+          value: 'self-supervised'
+        },
+        {
+          text: 'Semi-supervised',
+          value: 'semi-supervised'
+        },
+        {
+          text: 'Weakly Supervised',
+          value: 'weakly-supervised'
+        },
+        {
+          text: 'Supervised',
+          value: 'supervised'
+        }
+      ]
+    },
+
+    areaItems() {
       return this.$store.state[this.type == 'category' ? 'methodAreas' : 'taskAreas'].map(area => ({
         text: decodeKebobCase(area),
         value: area
+      }))
+    },
+
+    taskItems() {
+      return Object.values(this.$store.state['tasks']).map(item => ({
+        text: item.frontmatter.title,
+        value: item.name
+      }))
+    },
+
+    methodItems() {
+      return Object.values(this.$store.state['methods']).map(item => ({
+        text: item.frontmatter.title,
+        value: item.name
+      }))
+    },
+
+    categoryItems() {
+      return Object.values(this.$store.state['categories']).map(item => ({
+        text: item.frontmatter.title,
+        value: item.name
+      }))
+    },
+
+    paperItems() {
+      return Object.values(this.$store.state['papers']).map(item => ({
+        text: item.frontmatter.title,
+        value: item.name
       }))
     },
 
@@ -293,6 +373,10 @@ export default {
     card: computeFrontmatterProperty('card'),
     s2_paper_id: computeFrontmatterProperty('s2_paper_id'),
     
+    titleKebob() {
+      return encodeKebobCase(this.title)
+    },
+
     content: {
       get: function(){ 
           return this.$store.state.openItems[this.name].content; 
