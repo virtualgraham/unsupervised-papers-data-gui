@@ -10,6 +10,7 @@ import {
   readTextFile,
   // writeFile
 } from 'tauri/api/fs'
+import { execute } from 'tauri/api/process'
 import * as matter from 'gray-matter';
 
 async function readMarkdown(file) {
@@ -44,6 +45,16 @@ async function extractItemsFromDirFiles(dirFiles, type, area) {
       }
     }
     return items
+}
+
+async function readPdfs(pdfDir) {
+  const pdfFiles = await readDir(pdfDir)
+  return pdfFiles.reduce((acc, cur) => {
+    if( cur.name.endsWith('.pdf')) {
+      acc[cur.name] = true; 
+    }
+    return acc
+  }, {})
 }
 
 async function readTasks(dataDir) {
@@ -93,8 +104,9 @@ function encodeKebobCase(str) {
 
 export default new Vuex.Store({
   state: {
-    dataDir: '',
-    pdfDir: '',
+    dataDir: null,
+    pdfDir: null,
+    pdfFiles: {},
     tasks: {},
     methods: {},
     methodAreas: [],
@@ -209,6 +221,9 @@ export default new Vuex.Store({
       console.log('close item', name)
       Vue.delete(state.openItems, name)
     },
+    setPdfFiles (state, value) {
+      state.pdfFiles = value
+    },
     setDataDir (state, value) {
       state.dataDir = value
     },
@@ -255,6 +270,11 @@ export default new Vuex.Store({
   actions: {
     async openPdf ({ commit, state }, name) {
       console.log("open PDF", name)
+
+      if (!state.pdfDir) return
+      await execute('open', `${state.pdfDir}/${name}.pdf`)
+
+      
     },
     async removeItem ({ commit, state }, name) {
       const type = state.openItems[name].type
@@ -265,6 +285,13 @@ export default new Vuex.Store({
     },
 
     async loadData ({ commit, state }) {
+
+      if(state.pdfDir) {
+        const pdfFiles = await readPdfs(state.pdfDir)
+        console.log('pdfFiles', pdfFiles)
+        commit('setPdfFiles', pdfFiles)
+      }
+
       const tasks = await readTasks(state.dataDir)
       const methods = await readMethods(state.dataDir)
       const categories = await readCategories(state.dataDir)

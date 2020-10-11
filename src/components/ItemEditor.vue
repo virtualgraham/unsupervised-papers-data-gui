@@ -408,7 +408,8 @@ export default {
   },
   computed:{
     hasPdf() {
-      return this.itemType == 'paper'
+      console.log('hasPdf', `${this.name}.pdf`, this.$store.state.pdfFiles, this.$store.state.pdfFiles[`${this.name}.pdf`])
+      return this.itemType == 'paper' && this.$store.state.pdfFiles[`${this.name}.pdf`]
     },
 
     supervisionItems() {
