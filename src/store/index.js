@@ -4,11 +4,11 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { 
   readDir,
-  // createDir,
+  createDir,
   // removeDir,
   // removeFile,
   readTextFile,
-  // writeFile
+  writeFile
 } from 'tauri/api/fs'
 import { execute } from 'tauri/api/process'
 import * as matter from 'gray-matter';
@@ -88,6 +88,31 @@ function getAreas(items) {
   return [...areasSet]
 }
 
+async function writeItem(item, dataDir) {
+ 
+  let dir;
+
+  if(item.type == 'task') {
+    dir = `${dataDir}/tasks/${item.frontmatter.area}/${item.name}`
+  } else if (item.type == 'method') {
+    dir = `${dataDir}/methods/${item.name}`
+  } else if (item.type == 'category') {
+    dir = `${dataDir}/categories/${item.frontmatter.area}/${item.name}`
+  } else if (item.type == 'paper') {
+    dir = `${dataDir}/papers/${item.name}`
+  } else {
+    throw "WRITE ERROR: invalid item type"
+  }
+
+  console.log('writeItem', `${dir}/${item.name}.md`)
+
+  await createDir(dir, {recursive: true})
+
+  const raw = matter.stringify(item.content, item.frontmatter, {language: 'json'})
+
+  await writeFile({path: `${dir}/${item.name}.md`, contents: raw})
+}
+
 Vue.use(Vuex)
 
 const typeMap = {
@@ -123,28 +148,17 @@ export default new Vuex.Store({
 
   },
   mutations: {
+    insertSavedItem(state, item) {
+      Vue.set(state[typeMap[item.type]], item.name, item)
+    },
+
+    insertOpenItem(state, item) {
+      Vue.set(state.openItems, item.name, JSON.parse(JSON.stringify(item)))
+    },
+
     removeItem(state, {type, name}) {
       Vue.delete(state.openItems, name)
       Vue.delete(state[typeMap[type]], name)
-    },
-
-    saveItem(state, {name, close}) {   
-      const item = JSON.parse(JSON.stringify(state.openItems[name]))   
-
-      // TODO: check duplicate and invalid names
-
-      if(encodeKebobCase(item.frontmatter.title) != name) {
-        item.name = encodeKebobCase(item.frontmatter.title)
-        Vue.delete(state[typeMap[item.type]], name)
-        Vue.delete(state.openItems, name)
-        if(!close) {
-          Vue.set(state.openItems, item.name, JSON.parse(JSON.stringify(item)))
-        }
-      } else if (close) {
-        Vue.delete(state.openItems, name)
-      }
-
-      Vue.set(state[typeMap[item.type]], item.name, item)
     },
 
     addItem(state, type) {
@@ -224,7 +238,6 @@ export default new Vuex.Store({
       }
     },
 
-
     openSnackbar(state, message) {
       state.snackbarOpen = true
       state.snackbarMessage = message
@@ -246,9 +259,6 @@ export default new Vuex.Store({
       state.dialogMessage = ''
       state.dialogCallback = null
     },
-
-
-
 
     closeItem (state, name) {
       Vue.delete(state.openItems, name)
@@ -284,6 +294,7 @@ export default new Vuex.Store({
       state.loaded = value
     },
     setFrontmatterField (state, {name, field, value}) {
+      console.log('setFrontmatterField', {name, field, value})
       if(state.openItems[name] && state.openItems[name].frontmatter) {
         Vue.set(state.openItems[name].frontmatter, field, value)
       } else {
@@ -299,6 +310,7 @@ export default new Vuex.Store({
     }
   },
   actions: {
+
     async openPdf ({ commit, state }, name) {
       if (!state.pdfDir) return
       await execute('open', `${state.pdfDir}/${name}.pdf`)
@@ -307,10 +319,44 @@ export default new Vuex.Store({
     async removeItem ({ commit, state }, name) {
       const type = state.openItems[name].type
       commit('removeItem', {type, name})
+
+
     },
 
     async saveItem ({ commit, state }, {name, close}) {
-      commit('saveItem', {name, close})
+
+      const item = JSON.parse(JSON.stringify(state.openItems[name]))   
+
+      const oldItem = state[typeMap[item.type]][name]
+
+      // TODO: check duplicate and invalid names
+
+      if(oldItem && oldItem.frontmatter.area != item.frontmatter.area) {
+        console.log('need to move files - area changed')
+      }
+
+      if(encodeKebobCase(item.frontmatter.title) != name) {
+
+        if(item.file) {
+          console.log('need to move files - item renamed')
+        }
+        
+        item.name = encodeKebobCase(item.frontmatter.title)
+        
+        commit('removeItem', {type: item.type, name})
+
+        if(!close) {
+          commit('insertOpenItem', item)
+        }
+
+      } else if (close) {
+        commit('closeItem', name)
+      }
+
+      await writeItem(item, state.dataDir)
+
+      commit('insertSavedItem', item)
+
     },
 
     async loadData ({ commit, state }) {

@@ -314,6 +314,7 @@ function computeFrontmatterProperty(field, {get, set}={get: undefined, set: unde
           return get ? get(v) : v
       }, 
       set: function(value) { 
+          
           const v = set ? set(value) : value
           this.$store.commit('setFrontmatterField', {name: this.name, field, value: v}); 
       }
@@ -368,7 +369,7 @@ export default {
       this.$store.dispatch('saveItem', {name: this.name, close: false})
     },
     saveAndClose() {
-      this.$store.commit('saveItem', {name: this.name, close: true});
+      this.$store.dispatch('saveItem', {name: this.name, close: true});
     },
     async copyName() {
       try {

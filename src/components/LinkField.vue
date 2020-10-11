@@ -6,8 +6,8 @@
           ref="titleField"
           label="Title" 
           dense
-          :value="value.title" 
-          @input="update()"
+          v-model="title" 
+          @input="update"
         ></v-text-field>
       </div>
       <div class="mr-4" style="width: 200px">
@@ -16,8 +16,8 @@
           :items="types"
           label="Type"
           dense
-          :value="value.type" 
-          @input="update()"
+          v-model="type" 
+          @input="update"
         ></v-select>
 
       </div>
@@ -54,8 +54,8 @@
         ref="urlField" 
         label="URL" 
         dense 
-        :value="value.url" 
-        @input="update()"
+        v-model="url"
+        @input="update"
       ></v-text-field>
     </div>
   </v-sheet>
@@ -64,6 +64,18 @@
 <script>
 export default {
   props: ["value", "index"],
+
+  data() {
+    return {
+      title: this.value.title,
+      type: this.value.type,
+      url: this.value.url
+    }
+  },
+
+  created() {
+
+  },
 
   methods: {
     remove() {
@@ -81,12 +93,14 @@ export default {
         index: this.index
       })
     },
-    update() {
-      this.$emit("input", {
-        title: this.$refs.titleField.value,
-        type: this.$refs.typeField.value,
-        url: this.$refs.urlField.value,
-      });
+    update(e) {
+      this.$emit("input", 
+        {
+          title: this.title,
+          type: this.type,
+          url: this.url,
+        }
+      );
     },
   },
 

@@ -14,10 +14,10 @@
       </v-btn>
     </v-toolbar>
     <div class="d-flex flex-column">
-      <div v-for="(value, index) in value" :key="index" class="mb-5">
+      <div v-for="(link, index) in links" :key="link.url" class="mb-5">
         <LinkField 
-          :value="value" 
-          @input="update" 
+          :value="link" 
+          @input="update($event, index)" 
           @remove="remove" 
           @up="up" 
           @down="down"
@@ -34,35 +34,50 @@ import LinkField from './LinkField.vue'
 
 export default {
   props: ["value"],
+  data() {
+    return {
+      links: this.value
+    }
+  },
   components: {
     LinkField
   },
   methods: {
     add() {
-      const value = [...this.value, {
+      console.log('add')
+      this.links.push({
         title: '',
         url: '',
         type: 'website'
-      }]
-      this.$emit("input", value);
+      })
+      this.$emit("input", this.links);
     },
     remove(e) {
-      const value = [...this.value.slice(0, e.index), ...this.value.slice(e.index + 1)]
-      this.$emit("input", value);
+      console.log('remove', e.index)
+      this.$delete(this.links, e.index)
+      this.$emit("input", this.links);
     },
     up(e) {
+      console.log('up', e.index)
       if(e.index == 0) return
-      const value = [...this.value.slice(0, e.index-1), this.value[e.index], this.value[e.index - 1], ...this.value.slice(e.index + 1)]
-      this.$emit("input", value);
+      const a = this.links[e.index]
+      const b = this.links[e.index - 1]
+      this.$set(this.links, e.index, b)
+      this.$set(this.links, e.index-1, a)
+      this.$emit("input", this.links);
     },
     down(e) {
-      if(e.index == this.value.length-1) return
-      const value = [...this.value.slice(0, e.index), this.value[e.index + 1], this.value[e.index], ...this.value.slice(e.index + 2)]
-      this.$emit("input", value);
+      console.log('down', e.index)
+      if(e.index == this.links.length-1) return
+      const a = this.links[e.index]
+      const b = this.links[e.index + 1]
+      this.$set(this.links, e.index, b)
+      this.$set(this.links, e.index+1, a)
+      this.$emit("input", this.links);
     },
-    update() {
-      const value = [...Array(this.value.length).keys()].map((index) => this.$refs[`link-${index}`][0].value);
-      this.$emit("input", value);
+    update(e, index) {
+      this.$set(this.links, index, e)
+      this.$emit("input", this.links);
     },
   }
 };
