@@ -7,6 +7,7 @@
                 label="Filter"
                 outlined
                 dense
+                clearable
                 prepend-inner-icon="mdi-filter-outline"
             ></v-text-field>
         </div>
