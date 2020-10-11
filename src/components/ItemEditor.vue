@@ -1,6 +1,6 @@
 <template>
   <v-form class="settings">
-    <v-container>
+    <v-container class="pa-10">
       <v-row>
         <v-col cols="12">
           {{itemType}}
@@ -181,7 +181,7 @@
         <v-col cols="12">
           <v-text-field
             v-model="thumbnail"
-            label="Thumbnail"
+            label="Thumbnail Path"
             type="text"
           ></v-text-field>
         </v-col>
@@ -192,7 +192,7 @@
         <v-col cols="12">
           <v-text-field
             v-model="card"
-            label="Card"
+            label="Card Path"
             type="text"
           ></v-text-field>
         </v-col>
@@ -213,6 +213,7 @@
       <v-row>
         <v-col cols="12">
           <v-textarea
+            outlined
             label="Content"
             v-model="content"
           ></v-textarea>

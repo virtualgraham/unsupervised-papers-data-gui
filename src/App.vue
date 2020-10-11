@@ -2,34 +2,90 @@
   <v-app>
     <div id="app-inner">
     <div class="left-accordian">
-      <v-expansion-panels accordion class="pa-0">
-        <v-expansion-panel class="pa-0">
-          <v-expansion-panel-header class="pa-0">
-            Tasks
+      <v-expansion-panels accordion>
+        <v-expansion-panel>
+          <v-expansion-panel-header class="py-1">
+            <div class="add-button">
+              <div class="flex-grow-1">
+                Tasks
+              </div>
+              <div>
+                <v-btn
+                  icon
+                  :disabled="!loaded"
+                  color="green"
+                  @click="addTask"
+                >
+                  <v-icon>mdi-plus</v-icon>
+                </v-btn>
+              </div>
+            </div>
           </v-expansion-panel-header>
-          <v-expansion-panel-content class="pa-0">
+          <v-expansion-panel-content>
             <ItemList itemType="tasks" />
           </v-expansion-panel-content>
         </v-expansion-panel>
         <v-expansion-panel>
-          <v-expansion-panel-header>
-            Methods
+          <v-expansion-panel-header class="py-1">
+            <div class="add-button">
+              <div class="flex-grow-1">
+                Methods
+              </div>
+              <div>
+                <v-btn
+                  icon
+                  :disabled="!loaded"
+                  color="green"
+                  @click="addMethod"
+                >
+                  <v-icon>mdi-plus</v-icon>
+                </v-btn>
+              </div>
+            </div>
           </v-expansion-panel-header>
           <v-expansion-panel-content>
             <ItemList itemType="methods" />
           </v-expansion-panel-content>
         </v-expansion-panel>
         <v-expansion-panel>
-          <v-expansion-panel-header>
-            Categories
+          <v-expansion-panel-header class="py-1">
+            <div class="add-button">
+              <div class="flex-grow-1">
+                Categories
+              </div>
+              <div>
+                <v-btn
+                  icon
+                  :disabled="!loaded"
+                  color="green"
+                  @click="addCategory"
+                >
+                  <v-icon>mdi-plus</v-icon>
+                </v-btn>
+              </div>
+            </div>
           </v-expansion-panel-header>
           <v-expansion-panel-content>
             <ItemList itemType="categories" />
           </v-expansion-panel-content>
         </v-expansion-panel>
         <v-expansion-panel>
-          <v-expansion-panel-header>
-            Papers
+          <v-expansion-panel-header class="py-1">
+            <div class="add-button">
+              <div class="flex-grow-1">
+                Papers
+              </div>
+              <div>
+                <v-btn
+                  icon
+                  :disabled="!loaded"
+                  color="green"
+                  @click="addPaper"
+                >
+                  <v-icon>mdi-plus</v-icon>
+                </v-btn>
+              </div>
+            </div>
           </v-expansion-panel-header>
           <v-expansion-panel-content>
             <ItemList itemType="papers" />
@@ -96,6 +152,18 @@
       }
     },
     methods: {
+      addTask(e) {
+        e.stopPropagation()
+      },
+      addMethod(e) {
+        e.stopPropagation()
+      },
+      addCategory(e) {
+        e.stopPropagation()
+      },
+      addPaper(e) {
+        e.stopPropagation()
+      },
       truncate(str, n){
         return (str.length > n) ? str.substr(0, n-1) + '&hellip;' : str;
       }
@@ -110,21 +178,9 @@
       },
     },
     computed: {
-      // papers: function() {
-      //   const self = this
-      //   return Object.values(this.$store.state.papers).reduce(function(filtered, item) {
-      //     if (self.paperFilter.length == 0 || item.frontmatter.title.toLowerCase().includes(self.paperFilter.toLowerCase())) {
-      //       filtered.push({ 
-      //         name: item.name, 
-      //         title: item.frontmatter.title, 
-      //       });
-      //     }
-      //     return filtered;
-      //   }, []);
-      // },
-      // paperCount: function() {
-      //   return this.papers.length
-      // },
+      loaded() {
+        return this.$store.state.loaded
+      },
       openItems: function() {
         return Object.values(this.$store.state.openItems)
       },
@@ -137,6 +193,12 @@
 
 
 <style>
+.add-button {
+  display: flex; 
+  align-items: center; 
+  padding-right: 15px;
+}
+
 #app-inner {
   height: 100vh;
   width: 100vw;

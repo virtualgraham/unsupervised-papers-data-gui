@@ -1,14 +1,15 @@
 <template>
     <div>
-
-        <v-text-field
-            v-model="filter"
-            solo
-            hide-details="auto"
-            label="Filter"
-            prepend-inner-icon="mdi-map-marker"
-        ></v-text-field>
-
+        <div class="px-4 pb-2">
+            <v-text-field
+                v-model="filter"
+                hide-details="auto"
+                label="Filter"
+                outlined
+                dense
+                prepend-inner-icon="mdi-filter-outline"
+            ></v-text-field>
+        </div>
         <v-virtual-scroll
             height="calc(100vh - 310px)"
             item-height="45"
