@@ -63,6 +63,8 @@
             label="Name"
             type="text"
             readonly
+            append-outer-icon="mdi-content-copy"
+            @click:append-outer="copyName"
           ></v-text-field>
         </v-col>
       </v-row>
@@ -70,11 +72,11 @@
       <!-- Area (Need to also add new area) -->
       <v-row v-if="itemType == 'task' || itemType == 'category'">
         <v-col cols="12">
-          <v-autocomplete
+          <v-combobox
             label="Area"
             :items="areaItems"
             v-model="area"
-          ></v-autocomplete>
+          ></v-combobox>
         </v-col>
       </v-row>
      
@@ -121,7 +123,7 @@
             chips
             deletable-chips
             multiple
-            label="Categories"
+            label="Components"
             v-model="components"
             :items="methodItems"
           ></v-autocomplete>
@@ -153,7 +155,11 @@
       <!-- Authors -->
       <v-row v-if="itemType == 'paper'">
         <v-col cols="12" >
-          Authors
+          <v-text-field
+            v-model="authors"
+            label="Authors"
+            type="text"
+          ></v-text-field>
         </v-col>
       </v-row>
 
@@ -261,7 +267,44 @@
 
 
     </v-container>
+
+    <v-snackbar
+      v-model="copiedSnackbar"
+    >
+      Copied to clipboard
+
+      <template v-slot:action="{ attrs }">
+        <v-btn
+          color="pink"
+          text
+          v-bind="attrs"
+          @click="snackbar = false"
+        >
+          Close
+        </v-btn>
+      </template>
+    </v-snackbar>
+
+    <v-snackbar
+      v-model="copyFailedSnackbar"
+    >
+      Unable to copy to clipboard
+
+      <template v-slot:action="{ attrs }">
+        <v-btn
+          color="pink"
+          text
+          v-bind="attrs"
+          @click="snackbar = false"
+        >
+          Close
+        </v-btn>
+      </template>
+    </v-snackbar>
+
   </v-form>
+
+  
 </template>
 
 
@@ -303,6 +346,12 @@ export default {
         required: true
       }
   },
+  data() {
+    return {
+      copiedSnackbar: false,
+      copyFailedSnackbar: false
+    }
+  },
   methods: {
     close() {
       this.$store.commit('closeItem', this.name);
@@ -313,6 +362,14 @@ export default {
     saveAndClose() {
       this.save()
       this.close()
+    },
+    async copyName() {
+      try {
+        await navigator.clipboard.writeText(this.titleKebob)
+        this.copiedSnackbar = true
+      } catch {
+        this.copyFailedSnackbar = true
+      }
     }
   },
   computed:{
@@ -385,7 +442,22 @@ export default {
         return decodeKebobCase(this.itemType)
     },
 
-    area: computeFrontmatterProperty('area'),
+    area: computeFrontmatterProperty('area', {
+      get(value) {
+        console.log('area get computeFrontmatterProperty', value)
+        return {
+          text: decodeKebobCase(value),
+          value: value
+        }
+      },
+      set(value) {
+        console.log('area set computeFrontmatterProperty', value)
+        if(typeof value === 'object' && value !== null) {
+          return value.value
+        }
+        return encodeKebobCase(value)
+      }
+    }),
     title: computeFrontmatterProperty('title'),
     date: computeFrontmatterProperty('date'),
     year: computeFrontmatterProperty('year'),
@@ -393,7 +465,14 @@ export default {
     components: computeFrontmatterProperty('components'),
     introduced_by: computeFrontmatterProperty('introduced_by'),
     parent_task: computeFrontmatterProperty('parent_task'),
-    authors: computeFrontmatterProperty('authors'),
+    authors: computeFrontmatterProperty('authors', {
+      get(value) {
+        return value.join(', ')
+      },
+      set(value) {
+        return value.split(',').map(v => v.trim()).filter(v => v.length > 0)
+      }
+    }),
     abstract: computeFrontmatterProperty('abstract'),
     links: computeFrontmatterProperty('links'),
     supervision: computeFrontmatterProperty('supervision'),
