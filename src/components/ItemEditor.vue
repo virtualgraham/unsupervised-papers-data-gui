@@ -392,11 +392,10 @@ export default {
       this.$store.commit('closeItem', this.name);
     },
     save() {
-      this.$store.dispatch('saveItem', this.name)
+      this.$store.dispatch('saveItem', {name: this.name, close: false})
     },
     saveAndClose() {
-      this.save()
-      this.close()
+      this.$store.commit('saveItem', {name: this.name, close: true});
     },
     async copyName() {
       try {

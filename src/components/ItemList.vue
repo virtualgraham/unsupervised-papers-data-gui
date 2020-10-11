@@ -12,6 +12,7 @@
             ></v-text-field>
         </div>
         <v-virtual-scroll
+            ref="vscroll"
             height="calc(100vh - 242px)"
             item-height="45"
             :items="items"
@@ -49,6 +50,18 @@ export default {
         openItem(name) {
             console.log('openItem', {type: this.itemType, name: name})
             this.$store.commit('openItem', {type: this.itemType, name: name}); 
+        },
+        opened() {
+            console.log("ItemList opened")
+            const self = this
+            setTimeout(function () {
+                self.$refs.vscroll.onScroll()
+            }, 200)
+        }
+    },
+    watch: {
+        items() {
+            this.$refs.vscroll.onScroll()
         }
     },
     computed: {

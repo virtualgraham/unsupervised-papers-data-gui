@@ -87,6 +87,10 @@ const typeMap = {
   'paper': 'papers',
 }
 
+function encodeKebobCase(str) {
+  return str.replace(/[^0-9a-zA-Z]+/g, ' ').trim().replace(/([a-z])([A-Z])/g, '$1-$2').replace(/[-\s]+/g, '-').toLowerCase()
+}
+
 export default new Vuex.Store({
   state: {
     dataDir: '',
@@ -104,6 +108,25 @@ export default new Vuex.Store({
     removeItem(state, {type, name}) {
       Vue.delete(state.openItems, name)
       Vue.delete(state[typeMap[type]], name)
+    },
+
+    saveItem(state, {name, close}) {   
+      const item = JSON.parse(JSON.stringify(state.openItems[name]))   
+
+      // TODO: check duplicate and invalid names
+
+      if(encodeKebobCase(item.frontmatter.title) != name) {
+        item.name = encodeKebobCase(item.frontmatter.title)
+        Vue.delete(state[typeMap[item.type]], name)
+        Vue.delete(state.openItems, name)
+        if(!close) {
+          Vue.set(state.openItems, item.name, JSON.parse(JSON.stringify(item)))
+        }
+      } else if (close) {
+        Vue.delete(state.openItems, name)
+      }
+
+      Vue.set(state[typeMap[item.type]], item.name, item)
     },
 
     addItem(state, type) {
@@ -237,8 +260,8 @@ export default new Vuex.Store({
       const type = state.openItems[name].type
       commit('removeItem', {type, name})
     },
-    async saveItem ({ commit, state }, name) {
-      console.log("save item", name)
+    async saveItem ({ commit, state }, {name, close}) {
+      commit('saveItem', {name, close})
     },
 
     async loadData ({ commit, state }) {

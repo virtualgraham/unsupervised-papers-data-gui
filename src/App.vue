@@ -3,7 +3,7 @@
     <div id="app-inner">
     <div class="left-accordian">
       <v-expansion-panels accordion>
-        <v-expansion-panel>
+        <v-expansion-panel @change="panelOpened('tasksList')">
           <v-expansion-panel-header class="py-1">
             <div class="add-button">
               <div class="flex-grow-1">
@@ -22,10 +22,10 @@
             </div>
           </v-expansion-panel-header>
           <v-expansion-panel-content>
-            <ItemList itemType="tasks" />
+            <ItemList itemType="tasks" ref="tasksList" />
           </v-expansion-panel-content>
         </v-expansion-panel>
-        <v-expansion-panel>
+        <v-expansion-panel @change="panelOpened('methodsList')">
           <v-expansion-panel-header class="py-1">
             <div class="add-button">
               <div class="flex-grow-1">
@@ -44,10 +44,10 @@
             </div>
           </v-expansion-panel-header>
           <v-expansion-panel-content>
-            <ItemList itemType="methods" />
+            <ItemList itemType="methods" ref="methodsList" />
           </v-expansion-panel-content>
         </v-expansion-panel>
-        <v-expansion-panel>
+        <v-expansion-panel @change="panelOpened('categoriesList')">
           <v-expansion-panel-header class="py-1">
             <div class="add-button">
               <div class="flex-grow-1">
@@ -66,10 +66,10 @@
             </div>
           </v-expansion-panel-header>
           <v-expansion-panel-content>
-            <ItemList itemType="categories" />
+            <ItemList itemType="categories" ref="categoriesList" />
           </v-expansion-panel-content>
         </v-expansion-panel>
-        <v-expansion-panel>
+        <v-expansion-panel @change="panelOpened('papersList')">
           <v-expansion-panel-header class="py-1">
             <div class="add-button">
               <div class="flex-grow-1">
@@ -88,7 +88,7 @@
             </div>
           </v-expansion-panel-header>
           <v-expansion-panel-content>
-            <ItemList itemType="papers" />
+            <ItemList itemType="papers" ref="papersList" />
           </v-expansion-panel-content>
         </v-expansion-panel>
       </v-expansion-panels>
@@ -124,7 +124,7 @@
           :key="tab.name"
         >
           <v-card flat>
-            <ItemEditor :name="tab.name" />
+            <ItemEditor :name="tab.name" ref="papersList" />
           </v-card>
         </v-tab-item>
       </v-tabs-items>
@@ -153,6 +153,9 @@
       }
     },
     methods: {
+      panelOpened(r) {
+        this.$refs[r].opened()
+      },
       addTask(e) {
         e.stopPropagation()
         this.$store.commit('addItem', 'task'); 
