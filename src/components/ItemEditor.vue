@@ -6,6 +6,29 @@
 
         <v-spacer></v-spacer>
 
+        <v-btn 
+          v-if="hasPdf"
+          class="ml-4"
+          small
+          outlined
+          color="primary"
+          dark
+          @click="pdf"
+        >
+          PDF
+        </v-btn>
+
+        <v-btn
+          class="ml-4"
+          small
+          outlined
+          color="primary"
+          dark
+          @click="remove"
+        >
+          Remove
+        </v-btn>
+
         <v-btn
           class="ml-4"
           small
@@ -41,7 +64,7 @@
       </v-toolbar>
     </v-container>
 
-    <v-container class="px-10 pt-0 pb-10">
+    <v-container class="px-10 pt-0 pb-10" >
 
 
       <!-- Title -->
@@ -70,7 +93,7 @@
       </v-row>
 
       <!-- Area (Need to also add new area) -->
-      <v-row v-if="itemType == 'task' || itemType == 'category'">
+      <v-row v-if="itemType == 'task' || itemType == 'category' || itemType == 'method'">
         <v-col cols="12">
           <v-combobox
             label="Area"
@@ -176,7 +199,7 @@
       <!-- Links -->
       <v-row>
         <v-col cols="12">
-          Links
+          <LinkListField v-model="links" />
         </v-col>
       </v-row>
 
@@ -186,6 +209,9 @@
           <v-autocomplete
             label="Supervision"
             v-model="supervision"
+            chips
+            deletable-chips
+            multiple
             :items="supervisionItems"
           ></v-autocomplete>
         </v-col>
@@ -310,6 +336,8 @@
 
 <script>
 
+import LinkListField from './LinkListField.vue'
+
 function computeFrontmatterProperty(field, {get, set}={get: undefined, set: undefined}) {
     return {
       get: function() { 
@@ -339,6 +367,7 @@ function encodeKebobCase(str) {
 export default {
   name: 'ItemEditor',
   components: {
+    LinkListField
   },
   props: {
       name: {
@@ -353,6 +382,12 @@ export default {
     }
   },
   methods: {
+    pdf() {
+      this.$store.dispatch('openPdf', this.name)
+    },
+    remove() {
+      this.$store.dispatch('removeItem', this.name)
+    },
     close() {
       this.$store.commit('closeItem', this.name);
     },
@@ -373,6 +408,9 @@ export default {
     }
   },
   computed:{
+    hasPdf() {
+      return this.itemType == 'paper'
+    },
 
     supervisionItems() {
       return [

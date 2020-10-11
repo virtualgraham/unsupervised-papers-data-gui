@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import { v4 as uuidv4 } from 'uuid';
 
 import { 
   readDir,
@@ -79,6 +80,13 @@ function getAreas(items) {
 
 Vue.use(Vuex)
 
+const typeMap = {
+  'task': 'tasks',
+  'category': 'categories',
+  'method': 'methods',
+  'paper': 'papers',
+}
+
 export default new Vuex.Store({
   state: {
     dataDir: '',
@@ -93,6 +101,82 @@ export default new Vuex.Store({
     openItems: {},
   },
   mutations: {
+    removeItem(state, {type, name}) {
+      Vue.delete(state.openItems, name)
+      Vue.delete(state[typeMap[type]], name)
+    },
+
+    addItem(state, type) {
+      const name = uuidv4()
+      if(type == 'paper') {
+        Vue.set(state.openItems, name, {
+          file: null,
+          type,
+          name,
+          frontmatter: {
+            title: 'Untitled Paper',
+            date: null,
+            authors: [],
+            abstract: null,
+            links: [],
+            supervision: [],
+            tasks: [],
+            methods: [],
+            thumbnail: null,
+            card: null,
+            s2_paper_id: null
+          },
+          content: ''
+        })
+      } else if (type == 'method') {
+        Vue.set(state.openItems, name, {
+          file: null,
+          type,
+          name,
+          frontmatter: {
+            area: null,
+            title: 'Untitled Method',
+            year: null,
+            categories: [],
+            components: [],
+            introduced_by: null,
+            links: [],
+            thumbnail: null,
+            card: null
+          },
+          content: ''
+        })
+      } else if (type == 'category') {
+        Vue.set(state.openItems, name, {
+          file: null,
+          type,
+          name,
+          frontmatter: {
+            area: null,
+            title: 'Untitled Category',
+            thumbnail: null,
+            card: null
+          },
+          content: ''
+        })
+      } else if (type == 'task') {
+        Vue.set(state.openItems, name, {
+          file: null,
+          type,
+          name,
+          frontmatter: {
+            area: null,
+            title: 'Untitled Task',
+            parent_task: null,
+            links: [],
+            thumbnail: null,
+            card: null
+          },
+          content: ''
+        })
+      }
+    },
+
     openItem (state, {type, name}) {
       if(state[type] && state[type][name]) {
         Vue.set(state.openItems, name, JSON.parse(JSON.stringify(state[type][name])))
@@ -146,9 +230,17 @@ export default new Vuex.Store({
     }
   },
   actions: {
+    async openPdf ({ commit, state }, name) {
+      console.log("open PDF", name)
+    },
+    async removeItem ({ commit, state }, name) {
+      const type = state.openItems[name].type
+      commit('removeItem', {type, name})
+    },
     async saveItem ({ commit, state }, name) {
       console.log("save item", name)
     },
+
     async loadData ({ commit, state }) {
       const tasks = await readTasks(state.dataDir)
       const methods = await readMethods(state.dataDir)

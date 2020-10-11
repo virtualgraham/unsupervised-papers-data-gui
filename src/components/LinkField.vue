@@ -1,0 +1,137 @@
+<template>
+  <v-sheet height="130" outlined class="d-flex flex-column px-4 pt-6 pb-2">
+    <div class="d-flex">
+      <div class="mr-4 flex-grow-1">
+        <v-text-field 
+          ref="titleField"
+          label="Title" 
+          dense
+          :value="value.title" 
+          @input="update()"
+        ></v-text-field>
+      </div>
+      <div class="mr-4" style="width: 200px">
+        <v-select
+          ref="typeField"
+          :items="types"
+          label="Type"
+          dense
+          :value="value.type" 
+          @input="update()"
+        ></v-select>
+
+      </div>
+      <div class="flex-grow-0">
+        <v-btn
+          icon
+          color="red"
+          @click="remove"
+        >
+          <v-icon>mdi-delete-outline</v-icon>
+        </v-btn>
+      </div>
+      <div class="flex-grow-0">
+        <v-btn
+          icon
+          color="blue"
+          @click="down"
+        >
+          <v-icon>mdi-arrow-down</v-icon>
+        </v-btn>
+      </div>
+      <div class="flex-grow-0">
+        <v-btn
+          icon
+          color="blue"
+          @click="up"
+        >
+          <v-icon>mdi-arrow-up</v-icon>
+        </v-btn>
+      </div>
+    </div>
+    <div class="d-flex">
+      <v-text-field
+        ref="urlField" 
+        label="URL" 
+        dense 
+        :value="value.url" 
+        @input="update()"
+      ></v-text-field>
+    </div>
+  </v-sheet>
+</template>
+
+<script>
+export default {
+  props: ["value", "index"],
+
+  methods: {
+    remove() {
+      this.$emit("remove", {
+        index: this.index
+      })
+    },
+    up() {
+      this.$emit("up", {
+        index: this.index
+      })
+    },
+    down() {
+      this.$emit("down", {
+        index: this.index
+      })
+    },
+    update() {
+      console.log('this.$refs.titleField.value', this.$refs.titleField.value)
+      console.log('this.$refs.typeField.value', this.$refs.typeField.value)
+      console.log('this.$refs.urlField.value', this.$refs.urlField.value)
+
+      this.$emit("input", {
+        title: this.$refs.titleField.value,
+        type: this.$refs.typeField.value,
+        url: this.$refs.urlField.value,
+      });
+    },
+  },
+
+  computed: {
+    types() {
+      return [
+        {
+          text: 'PDF',
+          value: 'pdf'
+        },
+        {
+          text: 'Wikipedia',
+          value: 'wikipedia'
+        },
+        {
+          text: 'YouTube',
+          value: 'youtube'
+        },
+        {
+          text: 'GitHub',
+          value: 'github'
+        },
+        {
+          text: 'arXiv.org',
+          value: 'arxiv'
+        },
+        {
+          text: 'Semantic Scholar',
+          value: 'semanticscholar'
+        },
+        {
+          text: 'Papers with Code',
+          value: 'paperswithcode'
+        },
+        {
+          text: 'Website',
+          value: 'website'
+        },
+      ]
+    }
+  }
+};
+</script>
+

@@ -96,6 +96,7 @@
     <div class="content-tabs">
       <v-card>
         <v-tabs
+          background-color="#f0f0f0"
           v-model="tab"
           center-active
         >
@@ -109,7 +110,7 @@
           </v-tab>
         </v-tabs>
       </v-card>
-      <v-tabs-items v-model="tab">
+      <v-tabs-items v-model="tab" style="height: calc(100vh - 48px); overflow: auto">
         <v-tab-item
           key="__settings__"
         >
@@ -154,15 +155,19 @@
     methods: {
       addTask(e) {
         e.stopPropagation()
+        this.$store.commit('addItem', 'task'); 
       },
       addMethod(e) {
         e.stopPropagation()
+        this.$store.commit('addItem', 'method'); 
       },
       addCategory(e) {
         e.stopPropagation()
+        this.$store.commit('addItem', 'category'); 
       },
       addPaper(e) {
         e.stopPropagation()
+        this.$store.commit('addItem', 'paper'); 
       },
       truncate(str, n){
         return (str.length > n) ? str.substr(0, n-1) + '&hellip;' : str;
