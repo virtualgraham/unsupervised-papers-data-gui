@@ -221,7 +221,7 @@
 
 .v-expansion-panel-content__wrap {
   padding: 0 !important;
-  height: calc(100vh - 210px);
+  height: calc(100vh - 193px);
 }
 
 .v-expansion-panel--active > .v-expansion-panel-header {

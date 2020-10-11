@@ -12,7 +12,7 @@
             ></v-text-field>
         </div>
         <v-virtual-scroll
-            height="calc(100vh - 310px)"
+            height="calc(100vh - 242px)"
             item-height="45"
             :items="items"
         >
@@ -55,7 +55,7 @@ export default {
         items: function() {
             const self = this
             return Object.values(this.$store.state[this.itemType]).reduce(function(filtered, item) {
-                if (self.filter.length == 0 || item.frontmatter.title.toLowerCase().includes(self.filter.toLowerCase())) {
+                if (!self.filter || self.filter.length == 0 || item.frontmatter.title.toLowerCase().includes(self.filter.toLowerCase())) {
                 filtered.push({ 
                     name: item.name, 
                     title: item.frontmatter.title, 

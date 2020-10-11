@@ -1,11 +1,48 @@
 <template>
   <v-form class="settings">
-    <v-container class="pa-10">
-      <v-row>
-        <v-col cols="12">
-          {{itemType}}
-        </v-col>
-      </v-row>
+    <v-container class="px-6 pb-0">
+      <v-toolbar dense class="elevation-0">
+        <v-toolbar-title>{{itemTypeLabel}}</v-toolbar-title>
+
+        <v-spacer></v-spacer>
+
+        <v-btn
+          class="ml-4"
+          small
+          outlined
+          color="primary"
+          dark
+          @click="close"
+        >
+          Close
+        </v-btn>
+
+        <v-btn
+          class="ml-4"
+          small
+          outlined
+          color="primary"
+          dark
+          @click="save"
+        >
+          Save
+        </v-btn>
+
+        <v-btn
+          class="ml-4"
+          small
+          outlined
+          color="primary"
+          dark
+          @click="saveAndClose"
+        >
+          Save &amp; Close
+        </v-btn>
+      </v-toolbar>
+    </v-container>
+
+    <v-container class="px-10 pt-0 pb-10">
+
 
       <!-- Title -->
       <v-row>
@@ -213,6 +250,7 @@
       <v-row>
         <v-col cols="12">
           <v-textarea
+            style="font-family: 'Lucida Console', Monaco, monospace"
             outlined
             label="Content"
             v-model="content"
@@ -221,22 +259,6 @@
       </v-row>
 
 
-      <v-row>
-        <v-col cols="6">
-          <v-btn block
-            @click="close"
-          >
-            Close
-          </v-btn>
-        </v-col>
-        <v-col cols="6">
-          <v-btn block
-            @click="save"
-          >
-            Save
-          </v-btn>
-        </v-col>
-      </v-row>
 
     </v-container>
   </v-form>
@@ -287,6 +309,10 @@ export default {
     },
     save() {
       this.$store.dispatch('saveItem', this.name)
+    },
+    saveAndClose() {
+      this.save()
+      this.close()
     }
   },
   computed:{
@@ -352,8 +378,11 @@ export default {
     },
 
     itemType: function() {
-        console.log('this.$store.state.openItems[this.name]', this.$store.state.openItems[this.name])
         return this.$store.state.openItems[this.name].type
+    },
+
+    itemTypeLabel: function() {
+        return decodeKebobCase(this.itemType)
     },
 
     area: computeFrontmatterProperty('area'),
