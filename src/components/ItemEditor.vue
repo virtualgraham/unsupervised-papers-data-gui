@@ -197,7 +197,7 @@
       </v-row>
 
       <!-- Links -->
-      <v-row>
+      <v-row v-if="itemType != 'category'">
         <v-col cols="12">
           <LinkListField v-model="links" />
         </v-col>
@@ -282,6 +282,7 @@
       <v-row>
         <v-col cols="12">
           <v-textarea
+            @keyup.ctrl.76="console.log('ctrl-v')"
             style="font-family: 'Lucida Console', Monaco, monospace"
             outlined
             label="Content"

@@ -65,7 +65,7 @@ export default {
     computed: {
         items: function() {
             const self = this
-            return Object.values(this.$store.state[this.itemType]).reduce(function(filtered, item) {
+            const items = Object.values(this.$store.state[this.itemType]).reduce(function(filtered, item) {
                 if (!self.filter || self.filter.length == 0 || item.frontmatter.title.toLowerCase().includes(self.filter.toLowerCase())) {
                 filtered.push({ 
                     name: item.name, 
@@ -74,6 +74,8 @@ export default {
                 }
                 return filtered;
             }, []);
+            items.sort((a, b) => (a.title > b.title) ? 1 : -1)
+            return items
         }
     }
 }

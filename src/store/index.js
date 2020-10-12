@@ -5,10 +5,11 @@ import { v4 as uuidv4 } from 'uuid';
 import { 
   readDir,
   createDir,
-  // removeDir,
-  // removeFile,
+  removeDir,
+  removeFile,
   readTextFile,
-  writeFile
+  writeFile,
+  copyFile
 } from 'tauri/api/fs'
 import { execute } from 'tauri/api/process'
 import * as matter from 'gray-matter';
@@ -88,28 +89,50 @@ function getAreas(items) {
   return [...areasSet]
 }
 
+function getDir(item, dataDir) {
+  if(item.type == 'task') {
+    return `${dataDir}/tasks/${item.frontmatter.area}/${item.name}`
+  } else if (item.type == 'method') {
+    return `${dataDir}/methods/${item.name}`
+  } else if (item.type == 'category') {
+    return `${dataDir}/categories/${item.frontmatter.area}/${item.name}`
+  } else if (item.type == 'paper') {
+    return `${dataDir}/papers/${item.name}`
+  } else {
+    throw "getDir() error: invalid item type"
+  }
+}
+
+async function moveAccompanyingFiles(from, to) {
+  const fromFiles = await readDir(from)
+  // TODO: only filter out the md file with the same name as the folder
+  const mvFiles = fromFiles.filter(f => !f.name.endsWith('.md')).map(f => f.name);
+  for(const f of mvFiles) {
+    console.log('copyFile', `${from}/${f}`, `${to}/${f}`)
+    await copyFile(`${from}/${f}`, `${to}/${f}`)
+  }
+}
+
+async function removeItemFiles(dir) {
+  const files = await readDir(dir)
+  for(const f of files) {
+    console.log('removeFile', f.path)
+    await removeFile(f.path)
+  }
+  console.log('removeDir', dir)
+  await removeDir(dir)
+}
+
 async function writeItem(item, dataDir) {
  
-  let dir;
+  let dir = getDir(item, dataDir);
 
-  if(item.type == 'task') {
-    dir = `${dataDir}/tasks/${item.frontmatter.area}/${item.name}`
-  } else if (item.type == 'method') {
-    dir = `${dataDir}/methods/${item.name}`
-  } else if (item.type == 'category') {
-    dir = `${dataDir}/categories/${item.frontmatter.area}/${item.name}`
-  } else if (item.type == 'paper') {
-    dir = `${dataDir}/papers/${item.name}`
-  } else {
-    throw "WRITE ERROR: invalid item type"
-  }
-
-  console.log('writeItem', `${dir}/${item.name}.md`)
-
+  console.log('createDir', dir)
   await createDir(dir, {recursive: true})
 
   const raw = matter.stringify(item.content, item.frontmatter, {language: 'json'})
 
+  console.log('writeFile', `${dir}/${item.name}.md`)
   await writeFile({path: `${dir}/${item.name}.md`, contents: raw})
 }
 
@@ -156,7 +179,7 @@ export default new Vuex.Store({
       Vue.set(state.openItems, item.name, JSON.parse(JSON.stringify(item)))
     },
 
-    removeItem(state, {type, name}) {
+    removeItem(state, {name, type}) {
       Vue.delete(state.openItems, name)
       Vue.delete(state[typeMap[type]], name)
     },
@@ -317,10 +340,11 @@ export default new Vuex.Store({
     },
 
     async removeItem ({ commit, state }, name) {
+      console.log('removeItem action', name)
       const type = state.openItems[name].type
+      const oldItem = state[typeMap[type]][name]
       commit('removeItem', {type, name})
-
-
+      await removeItemFiles(getDir(oldItem, state.dataDir))
     },
 
     async saveItem ({ commit, state }, {name, close}) {
@@ -331,14 +355,18 @@ export default new Vuex.Store({
 
       // TODO: check duplicate and invalid names
 
+      let move = false
+
       if(oldItem && oldItem.frontmatter.area != item.frontmatter.area) {
         console.log('need to move files - area changed')
+        move = true
       }
 
       if(encodeKebobCase(item.frontmatter.title) != name) {
 
         if(item.file) {
           console.log('need to move files - item renamed')
+          move = true
         }
         
         item.name = encodeKebobCase(item.frontmatter.title)
@@ -356,6 +384,11 @@ export default new Vuex.Store({
       await writeItem(item, state.dataDir)
 
       commit('insertSavedItem', item)
+
+      if(move) {
+        await moveAccompanyingFiles(getDir(oldItem, state.dataDir), getDir(item, state.dataDir))
+        await removeItemFiles(getDir(oldItem, state.dataDir))
+      }
 
     },
 
@@ -383,6 +416,7 @@ export default new Vuex.Store({
       commit('setTaskAreas', taskAreas)
 
       commit('setLoaded', true)
+
     }
   },
   modules: {

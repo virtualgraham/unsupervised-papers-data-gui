@@ -12,3 +12,7 @@ A very basic GUI for editing Unsupervised Papers data
 [Material Design Icons](https://materialdesignicons.com/)
 [Tauri API](https://tauri.studio/en/docs/api/js)  
 [gray-matter](https://github.com/jonschlinkert/gray-matter)
+
+### TODO
+- when saving an item with a name change check there is not already an item with that name
+- Check for items with same names in different area folders
