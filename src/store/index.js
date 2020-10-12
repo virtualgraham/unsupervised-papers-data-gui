@@ -82,13 +82,6 @@ async function readPapers(dataDir) {
   return extractedItems.reduce((acc, cur) => {acc[cur.name] = cur; return acc}, {})
 }
 
-function getAreas(items) {
-  const areasSet = new Set(Object.values(items).map(item => {
-    return item.frontmatter.area
-  }))
-  return [...areasSet]
-}
-
 function getDir(item, dataDir) {
   if(item.type == 'task') {
     return `${dataDir}/tasks/${item.frontmatter.area}/${item.name}`
@@ -149,15 +142,16 @@ function encodeKebobCase(str) {
   return str.replace(/[^0-9a-zA-Z]+/g, ' ').trim().replace(/([a-z])([A-Z])/g, '$1-$2').replace(/[-\s]+/g, '-').toLowerCase()
 }
 
+console.log('dataDir', localStorage.getItem('dataDir'))
+console.log('pdfDir', localStorage.getItem('pdfDir'))
+
 export default new Vuex.Store({
   state: {
-    dataDir: null,
-    pdfDir: null,
+    dataDir: localStorage.getItem('dataDir'),
+    pdfDir: localStorage.getItem('pdfDir'),
     pdfFiles: {},
     tasks: {},
     methods: {},
-    methodAreas: [],
-    taskAreas: [],
     categories: {},
     papers: {},
     loaded: false,
@@ -167,8 +161,26 @@ export default new Vuex.Store({
     snackbarMessage: '',
     dialogOpen: false,
     dialogMessage: '',
-    dialogCallback: null
+    dialogCallback: null,
+    loading: false
 
+  },
+  getters: {
+    methodAreas: state => {
+      return [... new Set([
+        ...Object.values(state.methods).map(item => {
+          return item.frontmatter.area
+        }), 
+        ...Object.values(state.categories).map(item => {
+          return item.frontmatter.area
+        })
+      ])]
+    },
+    taskAreas: state => {
+      return [...new Set(Object.values(state.tasks).map(item => {
+        return item.frontmatter.area
+      }))]
+    }
   },
   mutations: {
     insertSavedItem(state, item) {
@@ -176,7 +188,9 @@ export default new Vuex.Store({
     },
 
     insertOpenItem(state, item) {
-      Vue.set(state.openItems, item.name, JSON.parse(JSON.stringify(item)))
+      const copy = JSON.parse(JSON.stringify(item))
+      copy.saved = true
+      Vue.set(state.openItems, copy.name, copy)
     },
 
     removeItem(state, {name, type}) {
@@ -188,6 +202,7 @@ export default new Vuex.Store({
       const name = uuidv4()
       if(type == 'paper') {
         Vue.set(state.openItems, name, {
+          saved: false,
           file: null,
           type,
           name,
@@ -208,6 +223,7 @@ export default new Vuex.Store({
         })
       } else if (type == 'method') {
         Vue.set(state.openItems, name, {
+          saved: false,
           file: null,
           type,
           name,
@@ -226,6 +242,7 @@ export default new Vuex.Store({
         })
       } else if (type == 'category') {
         Vue.set(state.openItems, name, {
+          saved: false,
           file: null,
           type,
           name,
@@ -239,6 +256,7 @@ export default new Vuex.Store({
         })
       } else if (type == 'task') {
         Vue.set(state.openItems, name, {
+          saved: false,
           file: null,
           type,
           name,
@@ -257,7 +275,9 @@ export default new Vuex.Store({
 
     openItem (state, {type, name}) {
       if(state[type] && state[type][name]) {
-        Vue.set(state.openItems, name, JSON.parse(JSON.stringify(state[type][name])))
+        const copy = JSON.parse(JSON.stringify(state[type][name]))
+        copy.saved = true
+        Vue.set(state.openItems, name, copy)
       }
     },
 
@@ -283,6 +303,10 @@ export default new Vuex.Store({
       state.dialogCallback = null
     },
 
+    setLoading (state, value) {
+      state.loading = value
+    },
+
     closeItem (state, name) {
       Vue.delete(state.openItems, name)
     },
@@ -290,9 +314,13 @@ export default new Vuex.Store({
       state.pdfFiles = value
     },
     setDataDir (state, value) {
+      console.log('setDataDir', value)
+      localStorage.setItem('dataDir', value),
       state.dataDir = value
     },
     setPdfDir (state, value) {
+      console.log('setPdfFiles', value)
+      localStorage.setItem('pdfDir', value),
       state.pdfDir = value
     },
     setPapers (state, value) {
@@ -307,12 +335,6 @@ export default new Vuex.Store({
     setTasks (state, value) {
       state.tasks = value
     },
-    setMethodAreas (state, value) {
-      state.methodAreas = value
-    },
-    setTaskAreas (state, value) {
-      state.taskAreas = value
-    },
     setLoaded (state, value) {
       state.loaded = value
     },
@@ -320,6 +342,7 @@ export default new Vuex.Store({
       console.log('setFrontmatterField', {name, field, value})
       if(state.openItems[name] && state.openItems[name].frontmatter) {
         Vue.set(state.openItems[name].frontmatter, field, value)
+        Vue.set(state.openItems[name], 'saved', false)
       } else {
         console.error('unable to set frontmatter field', {name, field, value})
       }
@@ -327,8 +350,16 @@ export default new Vuex.Store({
     setContent (state, {name, value}) {
       if(state.openItems[name]) {
         Vue.set(state.openItems[name], 'content', value)
+        Vue.set(state.openItems[name], 'saved', false)
       } else {
         console.error('unable to set content', {name, value})
+      }
+    },
+    setSaved (state, {name, value}) {
+      if(state.openItems[name]) {
+        Vue.set(state.openItems[name], 'saved', value)
+      } else {
+        console.error('unable to set saved on item', {name, value})
       }
     }
   },
@@ -350,6 +381,7 @@ export default new Vuex.Store({
     async saveItem ({ commit, state }, {name, close}) {
 
       const item = JSON.parse(JSON.stringify(state.openItems[name]))   
+      delete item.saved
 
       const oldItem = state[typeMap[item.type]][name]
 
@@ -357,7 +389,7 @@ export default new Vuex.Store({
 
       let move = false
 
-      if(oldItem && oldItem.frontmatter.area != item.frontmatter.area) {
+      if(oldItem && oldItem.frontmatter.area != item.frontmatter.area && (item.type == 'category' || item.type == 'task')) {
         console.log('need to move files - area changed')
         move = true
       }
@@ -390,33 +422,45 @@ export default new Vuex.Store({
         await removeItemFiles(getDir(oldItem, state.dataDir))
       }
 
+      if(!close) {
+        commit('setSaved', {name: item.name , value: true})
+      }
+      commit('openSnackbar', "Item Saved");
     },
 
     async loadData ({ commit, state }) {
+      try {
 
-      if(state.pdfDir) {
-        const pdfFiles = await readPdfs(state.pdfDir)
-        commit('setPdfFiles', pdfFiles)
+        commit('setLoading', true)
+
+        if(state.pdfDir) {
+          const pdfFiles = await readPdfs(state.pdfDir)
+          commit('setPdfFiles', pdfFiles)
+        }
+
+        const tasks = await readTasks(state.dataDir)
+        const methods = await readMethods(state.dataDir)
+        const categories = await readCategories(state.dataDir)
+        const papers = await readPapers(state.dataDir)
+
+        commit('setTasks', tasks)
+        commit('setMethods', methods)
+        commit('setCategories', categories) 
+        commit('setPapers', papers)
+
+        commit('setLoaded', true)
+
+        commit('setLoading', false)
+
+        commit('openSnackbar', "Data Loaded");
+
+      } catch (e) {
+
+        console.error(e)
+        commit('setLoading', false)
+        commit('openSnackbar', "Error Loading Data");
+
       }
-
-      const tasks = await readTasks(state.dataDir)
-      const methods = await readMethods(state.dataDir)
-      const categories = await readCategories(state.dataDir)
-      const papers = await readPapers(state.dataDir)
-
-      commit('setTasks', tasks)
-      commit('setMethods', methods)
-      commit('setCategories', categories) 
-      commit('setPapers', papers)
-
-      const taskAreas = getAreas(tasks)
-      const methodAreas = getAreas(categories)
-
-      commit('setMethodAreas', methodAreas)
-      commit('setTaskAreas', taskAreas)
-
-      commit('setLoaded', true)
-
     }
   },
   modules: {

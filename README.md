@@ -14,5 +14,10 @@ A very basic GUI for editing Unsupervised Papers data
 [gray-matter](https://github.com/jonschlinkert/gray-matter)
 
 ### TODO
+
 - when saving an item with a name change check there is not already an item with that name
 - Check for items with same names in different area folders
+- clicking a task or method in paper editor should open that item
+- create task or method button directly in paper editor
+- sort autocomplete / selection items
+- confirm close with unsaved changes

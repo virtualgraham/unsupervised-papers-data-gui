@@ -180,7 +180,26 @@
       </template>
     </v-snackbar>
 
-
+    <v-dialog
+      v-model="loading"
+      hide-overlay
+      persistent
+      width="300"
+    >
+      <v-card
+        color="primary"
+        dark
+      >
+        <v-card-text>
+          Loading
+          <v-progress-linear
+            indeterminate
+            color="white"
+            class="mb-0"
+          ></v-progress-linear>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
   </v-app>
 </template>
 
@@ -265,6 +284,9 @@
       },
       dialogCallback() {
         return this.$store.state.dialogCallback
+      },
+      loading() {
+        return this.$store.state.loading
       },
       loaded() {
         return this.$store.state.loaded

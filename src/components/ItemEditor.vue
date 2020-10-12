@@ -1,10 +1,15 @@
 <template>
-  <v-form class="settings">
+  <v-form class="settings" ref="form" v-model="valid" lazy-validation>
     <v-container class="px-6 pb-0">
       <v-toolbar dense class="elevation-0">
         <v-toolbar-title>{{itemTypeLabel}}</v-toolbar-title>
 
         <v-spacer></v-spacer>
+
+        <div>
+          <span v-if="saved">Saved</span>
+          <span v-if="!saved">Not Saved</span>
+        </div>
 
         <v-btn 
           v-if="hasPdf"
@@ -72,8 +77,10 @@
         <v-col cols="12">
           <v-text-field
             v-model="title"
+            :rules="titleRules"
             label="Title"
             type="text"
+            required
           ></v-text-field>
         </v-col>
       </v-row>
@@ -97,8 +104,10 @@
         <v-col cols="12">
           <v-combobox
             label="Area"
+            :rules="areaRules"
             :items="areaItems"
             v-model="area"
+            required
           ></v-combobox>
         </v-col>
       </v-row>
@@ -346,6 +355,23 @@ export default {
   },
   data() {
     return {
+      valid: true,
+      titleRules: [
+        v => !(!v || v.trim().length == 0) || 'Title is required',
+      ],
+      areaRules: [
+        value => 
+        {
+          let valid = false
+          if (typeof value === 'object') {
+            valid = value.value && value.value.trim().length > 0
+          } else {
+            valid = value && value.trim().length > 0
+          }
+          
+          return valid || 'Area is required'
+        }
+      ],
     }
   },
   methods: {
@@ -364,13 +390,33 @@ export default {
       });
     },
     close() {
-      this.$store.commit('closeItem', this.name);
+      if(!this.saved) {
+        const self = this
+        this.$store.commit('openDialog', {
+          message: `Discard unsaved changed?`,
+          callback: (value)=>{
+            if(value) {
+              self.$store.commit('closeItem', this.name);
+            }
+          }
+        });
+      } else {
+        this.$store.commit('closeItem', this.name);
+      }
     },
     save() {
-      this.$store.dispatch('saveItem', {name: this.name, close: false})
+      const valid = this.$refs.form.validate()
+      console.log('valid', valid)
+      if(valid) {
+        this.$store.dispatch('saveItem', {name: this.name, close: false})
+      }
     },
     saveAndClose() {
-      this.$store.dispatch('saveItem', {name: this.name, close: true});
+      const valid = this.$refs.form.validate()
+      console.log('valid', valid)
+      if(valid) {
+        this.$store.dispatch('saveItem', {name: this.name, close: true});
+      }
     },
     async copyName() {
       try {
@@ -412,7 +458,7 @@ export default {
     },
 
     areaItems() {
-      return this.$store.state[this.type == 'category' ? 'methodAreas' : 'taskAreas'].map(area => ({
+      return this.$store.getters[this.type == 'task' ? 'taskAreas' : 'methodAreas'].map(area => ({
         text: decodeKebobCase(area),
         value: area
       }))
@@ -503,6 +549,10 @@ export default {
       set: function(value){ 
           this.$store.commit('setContent', {name: this.name, value}); 
       }
+    },
+
+    saved() {
+      return this.$store.state.openItems[this.name].saved
     }
 
   }
