@@ -458,38 +458,48 @@ export default {
     },
 
     areaItems() {
-      return this.$store.getters[this.type == 'task' ? 'taskAreas' : 'methodAreas'].map(area => ({
+      const items = this.$store.getters[this.type == 'task' ? 'taskAreas' : 'methodAreas'].map(area => ({
         text: decodeKebobCase(area),
         value: area
       }))
+      items.sort((a, b) => a.text.localeCompare(b.text))
+      return items
     },
 
     taskItems() {
-      return Object.values(this.$store.state['tasks']).map(item => ({
+      const items = Object.values(this.$store.state['tasks']).map(item => ({
         text: item.frontmatter.title,
         value: item.name
       }))
+      items.sort((a, b) => a.text.localeCompare(b.text))
+      return items
     },
 
     methodItems() {
-      return Object.values(this.$store.state['methods']).map(item => ({
+      const items = Object.values(this.$store.state['methods']).map(item => ({
         text: item.frontmatter.title,
         value: item.name
       }))
+      items.sort((a, b) => a.text.localeCompare(b.text))
+      return items
     },
 
     categoryItems() {
-      return Object.values(this.$store.state['categories']).map(item => ({
+      const items = Object.values(this.$store.state['categories']).map(item => ({
         text: item.frontmatter.title,
         value: item.name
       }))
+      items.sort((a, b) => a.text.localeCompare(b.text))
+      return items
     },
 
     paperItems() {
-      return Object.values(this.$store.state['papers']).map(item => ({
+      const items = Object.values(this.$store.state['papers']).map(item => ({
         text: item.frontmatter.title,
         value: item.name
       }))
+      items.sort((a, b) => a.text.localeCompare(b.text))
+      return items
     },
 
     itemType: function() {

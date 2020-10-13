@@ -9,7 +9,7 @@ A very basic GUI for editing Unsupervised Papers data
 `npm run tauri:build`
 
 [vuetify](https://vuetifyjs.com/en/components/expansion-panels/)  
-[Material Design Icons](https://materialdesignicons.com/)
+[Material Design Icons](https://materialdesignicons.com/)  
 [Tauri API](https://tauri.studio/en/docs/api/js)  
 [gray-matter](https://github.com/jonschlinkert/gray-matter)
 

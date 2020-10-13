@@ -16,7 +16,9 @@ import * as matter from 'gray-matter';
 
 async function readMarkdown(file) {
   try {
+    // ---------------------------------- //
     const taskRaw = await readTextFile(file)
+    // ---------------------------------- //
     return matter(taskRaw, {language: 'json'})
   } catch (e) {
     console.error("Unable to parse file", file, e)
@@ -456,7 +458,7 @@ export default new Vuex.Store({
 
       } catch (e) {
 
-        console.error(e)
+        console.error('error loading data', e)
         commit('setLoading', false)
         commit('openSnackbar', "Error Loading Data");
 
