@@ -21,7 +21,7 @@
                 <v-list-item :key="item.name" @click="openItem(item.name)">
                     <v-list-item-content>
                         <v-list-item-title>
-                            {{ item.title }}
+                            {{ item.paperLabelsIcon }}{{ item.title }}
                         </v-list-item-title>
                     </v-list-item-content>
                 </v-list-item>
@@ -55,7 +55,29 @@ export default {
             setTimeout(function () {
                 self.$refs.vscroll.onScroll()
             }, 200)
-        }
+        },
+        paperLabelsIcon(item) {
+            console.log('paperLabelsIcon', this.itemType, item)
+            if(this.itemType == 'papers') {
+                let count = 0
+
+                if(item.frontmatter.supervision && item.frontmatter.supervision.length> 0) {
+                    count += 1
+                } 
+                
+                if(item.frontmatter.tasks && item.frontmatter.tasks.length> 0) {
+                    count += 1
+                } 
+
+                if(item.frontmatter.methods && item.frontmatter.methods.length> 0) {
+                    count += 1
+                }
+
+                return count == 3 ? '☑ ' : '☐ '
+            }
+
+            return ''
+        },
     },
     watch: {
         items() {
@@ -67,10 +89,11 @@ export default {
             const self = this
             const items = Object.values(this.$store.state[this.itemType]).reduce(function(filtered, item) {
                 if (!self.filter || self.filter.length == 0 || item.frontmatter.title.toLowerCase().includes(self.filter.toLowerCase())) {
-                filtered.push({ 
-                    name: item.name, 
-                    title: item.frontmatter.title, 
-                });
+                    filtered.push({ 
+                        name: item.name, 
+                        title: item.frontmatter.title, 
+                        paperLabelsIcon: self.paperLabelsIcon(item)
+                    });
                 }
                 return filtered;
             }, []);

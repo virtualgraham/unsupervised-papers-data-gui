@@ -99,6 +99,17 @@
         </v-col>
       </v-row>
 
+      <!-- Also Known As -->
+      <v-row v-if="itemType == 'task' || itemType == 'category' || itemType == 'method'">
+        <v-col cols="12" >
+          <v-text-field
+            v-model="also_known_as"
+            label="Also Known As"
+            type="text"            
+          ></v-text-field>
+        </v-col>
+      </v-row>
+
       <!-- Area (Need to also add new area) -->
       <v-row v-if="itemType == 'task' || itemType == 'category' || itemType == 'method'">
         <v-col cols="12">
@@ -261,6 +272,8 @@
             v-model="thumbnail"
             label="Thumbnail Path"
             type="text"
+            append-outer-icon="mdi-pencil-box-outline"
+            @click:append-outer="fillThumbnail"
           ></v-text-field>
         </v-col>
       </v-row>
@@ -272,6 +285,8 @@
             v-model="card"
             label="Card Path"
             type="text"
+            append-outer-icon="mdi-pencil-box-outline"
+            @click:append-outer="fillCard"
           ></v-text-field>
         </v-col>
       </v-row>
@@ -418,6 +433,12 @@ export default {
         this.$store.dispatch('saveItem', {name: this.name, close: true});
       }
     },
+    fillThumbnail() {
+      this.thumbnail = `${this.name}-thumb.jpg`
+    },
+    fillCard() {
+      this.card = `${this.name}-card.jpg`
+    },
     async copyName() {
       try {
         await navigator.clipboard.writeText(this.titleKebob)
@@ -524,7 +545,16 @@ export default {
         return encodeKebobCase(value)
       }
     }),
+
     title: computeFrontmatterProperty('title'),
+    also_known_as: computeFrontmatterProperty('also_known_as', {
+      get(value) {
+        return value ? value.join(', ') : []
+      },
+      set(value) {
+        return value.split(',').map(v => v.trim()).filter(v => v.length > 0)
+      }
+    }),
     date: computeFrontmatterProperty('date'),
     year: computeFrontmatterProperty('year'),
     categories: computeFrontmatterProperty('categories'),
@@ -533,7 +563,7 @@ export default {
     parent_task: computeFrontmatterProperty('parent_task'),
     authors: computeFrontmatterProperty('authors', {
       get(value) {
-        return value.join(', ')
+        return value ? value.join(', ') : []
       },
       set(value) {
         return value.split(',').map(v => v.trim()).filter(v => v.length > 0)

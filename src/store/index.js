@@ -232,6 +232,7 @@ export default new Vuex.Store({
           frontmatter: {
             area: null,
             title: 'Untitled Method',
+            also_known_as: [],
             year: null,
             categories: [],
             components: [],
@@ -251,6 +252,7 @@ export default new Vuex.Store({
           frontmatter: {
             area: null,
             title: 'Untitled Category',
+            also_known_as: [],
             thumbnail: null,
             card: null
           },
@@ -265,6 +267,7 @@ export default new Vuex.Store({
           frontmatter: {
             area: null,
             title: 'Untitled Task',
+            also_known_as: [],
             parent_task: null,
             links: [],
             thumbnail: null,
