@@ -1,6 +1,6 @@
 <template>
   <v-form class="settings" ref="form" v-model="valid" lazy-validation>
-    <v-container class="px-6 pb-0">
+    <!-- <v-container class="px-6 pb-0">
       <v-toolbar dense class="elevation-0">
         <v-toolbar-title>{{itemTypeLabel}}</v-toolbar-title>
 
@@ -67,7 +67,7 @@
           Save &amp; Close
         </v-btn>
       </v-toolbar>
-    </v-container>
+    </v-container> -->
 
     <v-container class="px-10 pt-0 pb-10" >
 
@@ -331,6 +331,7 @@
 <script>
 
 import LinkListField from './LinkListField.vue'
+import utils from '../utils.js'
 
 function computeFrontmatterProperty(field, {get, set}={get: undefined, set: undefined}) {
     return {
@@ -346,16 +347,16 @@ function computeFrontmatterProperty(field, {get, set}={get: undefined, set: unde
     }
 }
 
-function decodeKebobCase(str) {
-    if (!str) {
-        return ''
-    }
-    return str.split('-').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ')
-}
+// function decodeKebobCase(str) {
+//     if (!str) {
+//         return ''
+//     }
+//     return str.split('-').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ')
+// }
 
-function encodeKebobCase(str) {
-    return str.replace(/[^0-9a-zA-Z]+/g, ' ').trim().replace(/([a-z])([A-Z])/g, '$1-$2').replace(/[-\s]+/g, '-').toLowerCase()
-}
+// function encodeKebobCase(str) {
+//     return str.replace(/[^0-9a-zA-Z]+/g, ' ').trim().replace(/([a-z])([A-Z])/g, '$1-$2').replace(/[-\s]+/g, '-').toLowerCase()
+// }
 
 export default {
   name: 'ItemEditor',
@@ -390,48 +391,51 @@ export default {
     }
   },
   methods: {
-    pdf() {
-      this.$store.dispatch('openPdf', this.name)
-    },
-    remove() {
-      const self = this
-      this.$store.commit('openDialog', {
-        message: `Permanently remove ${self.itemType}?`,
-        callback: (value)=>{
-          if(value) {
-            self.$store.dispatch('removeItem', this.name)
-          }
-        }
-      });
-    },
-    close() {
-      if(!this.saved) {
-        const self = this
-        this.$store.commit('openDialog', {
-          message: `Discard unsaved changed?`,
-          callback: (value)=>{
-            if(value) {
-              self.$store.commit('closeItem', this.name);
-            }
-          }
-        });
-      } else {
-        this.$store.commit('closeItem', this.name);
-      }
-    },
-    save() {
-      const valid = this.$refs.form.validate()
-      console.log('valid', valid)
-      if(valid) {
-        this.$store.dispatch('saveItem', {name: this.name, close: false})
-      }
-    },
-    saveAndClose() {
-      const valid = this.$refs.form.validate()
-      console.log('valid', valid)
-      if(valid) {
-        this.$store.dispatch('saveItem', {name: this.name, close: true});
-      }
+    // pdf() {
+    //   this.$store.dispatch('openPdf', this.name)
+    // },
+    // remove() {
+    //   const self = this
+    //   this.$store.commit('openDialog', {
+    //     message: `Permanently remove ${self.itemType}?`,
+    //     callback: (value)=>{
+    //       if(value) {
+    //         self.$store.dispatch('removeItem', this.name)
+    //       }
+    //     }
+    //   });
+    // },
+    // close() {
+    //   if(!this.saved) {
+    //     const self = this
+    //     this.$store.commit('openDialog', {
+    //       message: `Discard unsaved changed?`,
+    //       callback: (value)=>{
+    //         if(value) {
+    //           self.$store.commit('closeItem', this.name);
+    //         }
+    //       }
+    //     });
+    //   } else {
+    //     this.$store.commit('closeItem', this.name);
+    //   }
+    // },
+    // save() {
+    //   const valid = this.$refs.form.validate()
+    //   console.log('valid', valid)
+    //   if(valid) {
+    //     this.$store.dispatch('saveItem', {name: this.name, close: false})
+    //   }
+    // },
+    // saveAndClose() {
+    //   const valid = this.$refs.form.validate()
+    //   console.log('valid', valid)
+    //   if(valid) {
+    //     this.$store.dispatch('saveItem', {name: this.name, close: true});
+    //   }
+    // },
+    validate() {
+      return this.$refs.form.validate()
     },
     fillThumbnail() {
       this.thumbnail = `${this.name}-thumb.jpg`
@@ -449,9 +453,9 @@ export default {
     }
   },
   computed:{
-    hasPdf() {
-      return this.itemType == 'paper' && this.$store.state.pdfFiles[`${this.name}.pdf`]
-    },
+    // hasPdf() {
+    //   return this.itemType == 'paper' && this.$store.state.pdfFiles[`${this.name}.pdf`]
+    // },
 
     supervisionItems() {
       return [
@@ -480,7 +484,7 @@ export default {
 
     areaItems() {
       const items = this.$store.getters[this.type == 'task' ? 'taskAreas' : 'methodAreas'].map(area => ({
-        text: decodeKebobCase(area),
+        text: utils.decodeKebobCase(area),
         value: area
       }))
       items.sort((a, b) => a.text.localeCompare(b.text))
@@ -528,13 +532,13 @@ export default {
     },
 
     itemTypeLabel: function() {
-        return decodeKebobCase(this.itemType)
+        return utils.decodeKebobCase(this.itemType)
     },
 
     area: computeFrontmatterProperty('area', {
       get(value) {
         return {
-          text: decodeKebobCase(value),
+          text: utils.decodeKebobCase(value),
           value: value
         }
       },
@@ -542,7 +546,7 @@ export default {
         if(typeof value === 'object' && value !== null) {
           return value.value
         }
-        return encodeKebobCase(value)
+        return utils.encodeKebobCase(value)
       }
     }),
 
@@ -579,7 +583,7 @@ export default {
     s2_paper_id: computeFrontmatterProperty('s2_paper_id'),
     
     titleKebob() {
-      return encodeKebobCase(this.title)
+      return utils.encodeKebobCase(this.title)
     },
 
     content: {
@@ -591,9 +595,9 @@ export default {
       }
     },
 
-    saved() {
-      return this.$store.state.openItems[this.name].saved
-    }
+    // saved() {
+    //   return this.$store.state.openItems[this.name].saved
+    // }
 
   }
 }

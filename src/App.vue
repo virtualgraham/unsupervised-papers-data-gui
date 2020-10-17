@@ -111,14 +111,86 @@
             </v-tab>
           </v-tabs>
         </v-card>
-        <v-tabs-items v-model="openTabIndex" style="height: calc(100vh - 48px); overflow: auto">
+
+        <v-container class="px-6 pt-1 pb-0" v-if="openTabName != '__settings__'">
+          <v-toolbar dense class="elevation-0">
+            <v-toolbar-title>{{itemTypeLabel}}</v-toolbar-title>
+
+            <v-spacer></v-spacer>
+
+            <div>
+              <span v-if="saved">Saved</span>
+              <span v-if="!saved">Not Saved</span>
+            </div>
+
+            <v-btn 
+              v-if="hasPdf"
+              class="ml-4"
+              small
+              outlined
+              color="primary"
+              dark
+              @click="pdf"
+            >
+              PDF
+            </v-btn>
+
+            <v-btn
+              class="ml-4"
+              small
+              outlined
+              color="primary"
+              dark
+              @click="remove"
+            >
+              Remove
+            </v-btn>
+
+
+
+            <v-btn
+              class="ml-4"
+              small
+              outlined
+              color="primary"
+              dark
+              @click="save"
+            >
+              Save
+            </v-btn>
+
+            <v-btn
+              class="ml-4"
+              small
+              outlined
+              color="primary"
+              dark
+              @click="saveAndClose"
+            >
+              Save &amp; Close
+            </v-btn>
+
+            <v-btn
+              class="ml-4"
+              small
+              outlined
+              color="primary"
+              dark
+              @click="close"
+            >
+              Close
+            </v-btn>
+          </v-toolbar>
+        </v-container>
+
+        <v-tabs-items v-model="openTabIndex" style="height: calc(100vh - 100px); overflow: auto">
           <v-tab-item
             v-for="tab in tabs"
             :key="tab"
           >
             <Settings v-if="tab == '__settings__'"/>
             <v-card flat v-if="tab != '__settings__'">
-              <ItemEditor :name="tab" ref="papersList" />
+              <ItemEditor :name="tab" :ref="tab" />
             </v-card>
           </v-tab-item>
         </v-tabs-items>
@@ -201,6 +273,7 @@
   import Settings from './components/Settings.vue'
   import ItemList from './components/ItemList.vue'
   import ItemEditor from './components/ItemEditor.vue'
+  import utils from './utils.js'
 
   export default {
     name: "app",
@@ -215,6 +288,54 @@
       }
     },
     methods: {
+      pdf() {
+        this.$store.dispatch('openPdf', this.openTabName)
+      },
+      remove() {
+        const self = this
+        this.$store.commit('openDialog', {
+          message: `Permanently remove ${self.itemType}?`,
+          callback: (value)=>{
+            if(value) {
+              self.$store.dispatch('removeItem', this.openTabName)
+            }
+          }
+        });
+      },
+      close() {
+        if(!this.saved) {
+          const self = this
+          this.$store.commit('openDialog', {
+            message: `Discard unsaved changed?`,
+            callback: (value)=>{
+              if(value) {
+                self.$store.commit('closeItem', this.openTabName);
+              }
+            }
+          });
+        } else {
+          this.$store.commit('closeItem', this.openTabName);
+        }
+      },
+      save() {
+        console.log('save', this.$refs[this.openTabName])
+        const valid = this.$refs[this.openTabName][0].validate() // TODO FIX
+        console.log('valid', valid)
+        if(valid) {
+          this.$store.dispatch('saveItem', {name: this.openTabName, close: false})
+        }
+      },
+      saveAndClose() {
+        console.log('saveAndClose', this.$refs[this.openTabName])
+        const valid = this.$refs[this.openTabName][0].validate() // TODO FIX
+        console.log('valid', valid)
+        if(valid) {
+          this.$store.dispatch('saveItem', {name: this.openTabName, close: true});
+        }
+      },
+
+
+
       title(name) {
         return this.$store.state.openItems[name].frontmatter.title
       },
@@ -252,6 +373,25 @@
     //   }
     // },
     computed: {
+      openTabName() {
+        return this.$store.state.openTabName
+      },
+      saved() {
+        return this.openTabName == '__settings__' ? false : this.$store.state.openItems[this.openTabName].saved
+      },
+      itemTypeLabel: function() {
+          return utils.decodeKebobCase(this.itemType)
+      },
+      itemType: function() {
+          return this.openTabName == '__settings__' ? '' : this.$store.state.openItems[this.openTabName].type
+      },
+      hasPdf() {
+        if(this.openTabName == '__settings__') { return false }
+        return this.itemType == 'paper' && this.$store.state.pdfFiles[`${this.openTabName}.pdf`]
+      },
+
+
+
       snackbarOpen: {
         get() {
           return this.$store.state.snackbarOpen
