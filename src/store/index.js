@@ -158,7 +158,8 @@ export default new Vuex.Store({
     papers: {},
     loaded: false,
     openItems: {},
-
+    openTabName: '__settings__',
+    tabs: ['__settings__'],
     snackbarOpen: false,
     snackbarMessage: '',
     dialogOpen: false,
@@ -182,26 +183,40 @@ export default new Vuex.Store({
       return [...new Set(Object.values(state.tasks).map(item => {
         return item.frontmatter.area
       }))]
+    },
+    openTabIndex: state => {
+      return state.tabs.indexOf(state.openTabName)
     }
   },
   mutations: {
+    setOpenTabIndex(state, index) {
+      state.openTabName = state.tabs[index]
+    },
+
     insertSavedItem(state, item) {
       Vue.set(state[typeMap[item.type]], item.name, item)
     },
 
-    insertOpenItem(state, item) {
+    insertOpenItem(state, {item, tab}) {
       const copy = JSON.parse(JSON.stringify(item))
       copy.saved = true
+      if(!Object.prototype.hasOwnProperty.call(state.openItems, copy.name)) { state.tabs.splice(tab, 0, copy.name) }
+      state.openTabName = copy.name
       Vue.set(state.openItems, copy.name, copy)
+
     },
 
     removeItem(state, {name, type}) {
+      if(Object.prototype.hasOwnProperty.call(state.openItems, name)) { state.tabs.splice(state.tabs.indexOf(name), 1) }
+      state.openTabName = state.tabs[state.tabs.length - 1]
+      console.log('removeItem', state.openTabName)
       Vue.delete(state.openItems, name)
       Vue.delete(state[typeMap[type]], name)
     },
 
     addItem(state, type) {
       const name = uuidv4()
+
       if(type == 'paper') {
         Vue.set(state.openItems, name, {
           saved: false,
@@ -276,12 +291,17 @@ export default new Vuex.Store({
           content: ''
         })
       }
+
+      state.tabs.push(name)
+      state.openTabName = name
     },
 
     openItem (state, {type, name}) {
       if(state[type] && state[type][name]) {
         const copy = JSON.parse(JSON.stringify(state[type][name]))
         copy.saved = true
+        if(!Object.prototype.hasOwnProperty.call(state.openItems, name)) { state.tabs.push(name) }
+        state.openTabName = name
         Vue.set(state.openItems, name, copy)
       }
     },
@@ -313,7 +333,9 @@ export default new Vuex.Store({
     },
 
     closeItem (state, name) {
+      if(Object.prototype.hasOwnProperty.call(state.openItems, name)) { state.tabs.splice(state.tabs.indexOf(name), 1) }
       Vue.delete(state.openItems, name)
+      state.openTabName = state.tabs[state.tabs.length - 1]
     },
     setPdfFiles (state, value) {
       state.pdfFiles = value
@@ -408,10 +430,12 @@ export default new Vuex.Store({
         
         item.name = encodeKebobCase(item.frontmatter.title)
         
+        const tab = state.tabs.indexOf(name)
+
         commit('removeItem', {type: item.type, name})
 
         if(!close) {
-          commit('insertOpenItem', item)
+          commit('insertOpenItem', {item, tab})
         }
 
       } else if (close) {

@@ -1,135 +1,129 @@
 <template>
   <v-app>
     <div id="app-inner">
-    <div class="left-accordian">
-      <v-expansion-panels accordion>
-        <v-expansion-panel @change="panelOpened('tasksList')">
-          <v-expansion-panel-header class="py-1">
-            <div class="add-button">
-              <div class="flex-grow-1">
-                Tasks
+      <div class="left-accordian">
+        <v-expansion-panels accordion>
+          <v-expansion-panel @change="panelOpened('tasksList')">
+            <v-expansion-panel-header class="py-1">
+              <div class="add-button">
+                <div class="flex-grow-1">
+                  Tasks
+                </div>
+                <div>
+                  <v-btn
+                    icon
+                    :disabled="!loaded"
+                    color="green"
+                    @click="addTask"
+                  >
+                    <v-icon>mdi-plus</v-icon>
+                  </v-btn>
+                </div>
               </div>
-              <div>
-                <v-btn
-                  icon
-                  :disabled="!loaded"
-                  color="green"
-                  @click="addTask"
-                >
-                  <v-icon>mdi-plus</v-icon>
-                </v-btn>
+            </v-expansion-panel-header>
+            <v-expansion-panel-content>
+              <ItemList itemType="tasks" ref="tasksList" />
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+          <v-expansion-panel @change="panelOpened('methodsList')">
+            <v-expansion-panel-header class="py-1">
+              <div class="add-button">
+                <div class="flex-grow-1">
+                  Methods
+                </div>
+                <div>
+                  <v-btn
+                    icon
+                    :disabled="!loaded"
+                    color="green"
+                    @click="addMethod"
+                  >
+                    <v-icon>mdi-plus</v-icon>
+                  </v-btn>
+                </div>
               </div>
-            </div>
-          </v-expansion-panel-header>
-          <v-expansion-panel-content>
-            <ItemList itemType="tasks" ref="tasksList" />
-          </v-expansion-panel-content>
-        </v-expansion-panel>
-        <v-expansion-panel @change="panelOpened('methodsList')">
-          <v-expansion-panel-header class="py-1">
-            <div class="add-button">
-              <div class="flex-grow-1">
-                Methods
+            </v-expansion-panel-header>
+            <v-expansion-panel-content>
+              <ItemList itemType="methods" ref="methodsList" />
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+          <v-expansion-panel @change="panelOpened('categoriesList')">
+            <v-expansion-panel-header class="py-1">
+              <div class="add-button">
+                <div class="flex-grow-1">
+                  Categories
+                </div>
+                <div>
+                  <v-btn
+                    icon
+                    :disabled="!loaded"
+                    color="green"
+                    @click="addCategory"
+                  >
+                    <v-icon>mdi-plus</v-icon>
+                  </v-btn>
+                </div>
               </div>
-              <div>
-                <v-btn
-                  icon
-                  :disabled="!loaded"
-                  color="green"
-                  @click="addMethod"
-                >
-                  <v-icon>mdi-plus</v-icon>
-                </v-btn>
+            </v-expansion-panel-header>
+            <v-expansion-panel-content>
+              <ItemList itemType="categories" ref="categoriesList" />
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+          <v-expansion-panel @change="panelOpened('papersList')">
+            <v-expansion-panel-header class="py-1">
+              <div class="add-button">
+                <div class="flex-grow-1">
+                  Papers
+                </div>
+                <div>
+                  <v-btn
+                    icon
+                    :disabled="!loaded"
+                    color="green"
+                    @click="addPaper"
+                  >
+                    <v-icon>mdi-plus</v-icon>
+                  </v-btn>
+                </div>
               </div>
-            </div>
-          </v-expansion-panel-header>
-          <v-expansion-panel-content>
-            <ItemList itemType="methods" ref="methodsList" />
-          </v-expansion-panel-content>
-        </v-expansion-panel>
-        <v-expansion-panel @change="panelOpened('categoriesList')">
-          <v-expansion-panel-header class="py-1">
-            <div class="add-button">
-              <div class="flex-grow-1">
-                Categories
-              </div>
-              <div>
-                <v-btn
-                  icon
-                  :disabled="!loaded"
-                  color="green"
-                  @click="addCategory"
-                >
-                  <v-icon>mdi-plus</v-icon>
-                </v-btn>
-              </div>
-            </div>
-          </v-expansion-panel-header>
-          <v-expansion-panel-content>
-            <ItemList itemType="categories" ref="categoriesList" />
-          </v-expansion-panel-content>
-        </v-expansion-panel>
-        <v-expansion-panel @change="panelOpened('papersList')">
-          <v-expansion-panel-header class="py-1">
-            <div class="add-button">
-              <div class="flex-grow-1">
-                Papers
-              </div>
-              <div>
-                <v-btn
-                  icon
-                  :disabled="!loaded"
-                  color="green"
-                  @click="addPaper"
-                >
-                  <v-icon>mdi-plus</v-icon>
-                </v-btn>
-              </div>
-            </div>
-          </v-expansion-panel-header>
-          <v-expansion-panel-content>
-            <ItemList itemType="papers" ref="papersList" />
-          </v-expansion-panel-content>
-        </v-expansion-panel>
-      </v-expansion-panels>
-    </div>
-    <div class="content-tabs">
-      <v-card>
-        <v-tabs
-          background-color="#f0f0f0"
-          v-model="tab"
-          center-active
-        >
-          <v-tabs-slider></v-tabs-slider>
-          <v-tab
-            v-for="tab in tabs"
-            :key="tab.name"
+            </v-expansion-panel-header>
+            <v-expansion-panel-content>
+              <ItemList itemType="papers" ref="papersList" />
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
+      </div>
+
+      <div class="content-tabs">
+        <v-card>
+          <v-tabs
+            background-color="#f0f0f0"
+            v-model="openTabIndex"
+            center-active
           >
-            <span v-if="tab.name != '__settings__'" class="overline" style="line-height: 15px">{{ tab.frontmatter.title }}</span>
-            <v-icon v-if="tab.name == '__settings__'">mdi-cog-outline</v-icon>
-          </v-tab>
-        </v-tabs>
-      </v-card>
-      <v-tabs-items v-model="tab" style="height: calc(100vh - 48px); overflow: auto">
-        <v-tab-item
-          key="__settings__"
-        >
-          <v-card flat>
-            <Settings/>
-          </v-card>
-        </v-tab-item>
+            <v-tabs-slider></v-tabs-slider>
+            <v-tab
+              v-for="tab in tabs"
+              :key="tab"
+            >
+              <span v-if="tab != '__settings__'" class="overline" style="line-height: 15px">{{title(tab)}}</span>
+              <v-icon v-if="tab == '__settings__'">mdi-cog-outline</v-icon>
+            </v-tab>
+          </v-tabs>
+        </v-card>
+        <v-tabs-items v-model="openTabIndex" style="height: calc(100vh - 48px); overflow: auto">
+          <v-tab-item
+            v-for="tab in tabs"
+            :key="tab"
+          >
+            <Settings v-if="tab == '__settings__'"/>
+            <v-card flat v-if="tab != '__settings__'">
+              <ItemEditor :name="tab" ref="papersList" />
+            </v-card>
+          </v-tab-item>
+        </v-tabs-items>
+      </div>
 
-        <v-tab-item
-          v-for="tab in openItems"
-          :key="tab.name"
-        >
-          <v-card flat>
-            <ItemEditor :name="tab.name" ref="papersList" />
-          </v-card>
-        </v-tab-item>
-      </v-tabs-items>
-
-    </div>
     </div>
 
     <v-dialog
@@ -217,11 +211,13 @@
     },
     data() {
       return {
-        tab: null,
         paperFilter: '',
       }
     },
     methods: {
+      title(name) {
+        return this.$store.state.openItems[name].frontmatter.title
+      },
       closeDialog(value) {
         const callback = this.$store.state.dialogCallback
         this.$store.commit('closeDialog', value); 
@@ -250,11 +246,11 @@
         return (str.length > n) ? str.substr(0, n-1) + '&hellip;' : str;
       }
     },
-    watch: {
-      openItems (val) {
-        this.tab = val.length
-      }
-    },
+    // watch: {
+    //   openItems (val) {
+    //     this.tab = val.length
+    //   }
+    // },
     computed: {
       snackbarOpen: {
         get() {
@@ -291,11 +287,19 @@
       loaded() {
         return this.$store.state.loaded
       },
-      openItems: function() {
-        return Object.values(this.$store.state.openItems)
-      },
+      // openItems: function() {
+      //   return Object.values(this.$store.state.openItems)
+      // },
       tabs: function() {
-        return [{name: '__settings__', frontmatter: {title: "Settings"}}, ...Object.values(this.$store.state.openItems)]
+        return this.$store.state.tabs
+      },
+      openTabIndex: {
+        get() {
+          return this.$store.getters.openTabIndex
+        },
+        set(index) {
+          this.$store.commit('setOpenTabIndex', index); 
+        }
       }
     }
   };
