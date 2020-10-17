@@ -57,7 +57,7 @@ export default {
             }, 200)
         },
         paperLabelsIcon(item) {
-            console.log('paperLabelsIcon', this.itemType, item)
+            // console.log('paperLabelsIcon', this.itemType, item)
             if(this.itemType == 'papers') {
                 let count = 0
 
