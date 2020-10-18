@@ -1,76 +1,7 @@
 <template>
-  <v-form class="settings" ref="form" v-model="valid" lazy-validation>
-    <!-- <v-container class="px-6 pb-0">
-      <v-toolbar dense class="elevation-0">
-        <v-toolbar-title>{{itemTypeLabel}}</v-toolbar-title>
-
-        <v-spacer></v-spacer>
-
-        <div>
-          <span v-if="saved">Saved</span>
-          <span v-if="!saved">Not Saved</span>
-        </div>
-
-        <v-btn 
-          v-if="hasPdf"
-          class="ml-4"
-          small
-          outlined
-          color="primary"
-          dark
-          @click="pdf"
-        >
-          PDF
-        </v-btn>
-
-        <v-btn
-          class="ml-4"
-          small
-          outlined
-          color="primary"
-          dark
-          @click="remove"
-        >
-          Remove
-        </v-btn>
-
-        <v-btn
-          class="ml-4"
-          small
-          outlined
-          color="primary"
-          dark
-          @click="close"
-        >
-          Close
-        </v-btn>
-
-        <v-btn
-          class="ml-4"
-          small
-          outlined
-          color="primary"
-          dark
-          @click="save"
-        >
-          Save
-        </v-btn>
-
-        <v-btn
-          class="ml-4"
-          small
-          outlined
-          color="primary"
-          dark
-          @click="saveAndClose"
-        >
-          Save &amp; Close
-        </v-btn>
-      </v-toolbar>
-    </v-container> -->
+  <v-form class="settings" ref="form" v-model="valid" lazy-validation  >
 
     <v-container class="px-10 pt-0 pb-10" >
-
 
       <!-- Title -->
       <v-row>
@@ -314,17 +245,8 @@
           ></v-textarea>
         </v-col>
       </v-row>
-
-
-
     </v-container>
-
-
-
-
   </v-form>
-
-  
 </template>
 
 
@@ -347,16 +269,6 @@ function computeFrontmatterProperty(field, {get, set}={get: undefined, set: unde
     }
 }
 
-// function decodeKebobCase(str) {
-//     if (!str) {
-//         return ''
-//     }
-//     return str.split('-').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ')
-// }
-
-// function encodeKebobCase(str) {
-//     return str.replace(/[^0-9a-zA-Z]+/g, ' ').trim().replace(/([a-z])([A-Z])/g, '$1-$2').replace(/[-\s]+/g, '-').toLowerCase()
-// }
 
 export default {
   name: 'ItemEditor',
@@ -391,49 +303,7 @@ export default {
     }
   },
   methods: {
-    // pdf() {
-    //   this.$store.dispatch('openPdf', this.name)
-    // },
-    // remove() {
-    //   const self = this
-    //   this.$store.commit('openDialog', {
-    //     message: `Permanently remove ${self.itemType}?`,
-    //     callback: (value)=>{
-    //       if(value) {
-    //         self.$store.dispatch('removeItem', this.name)
-    //       }
-    //     }
-    //   });
-    // },
-    // close() {
-    //   if(!this.saved) {
-    //     const self = this
-    //     this.$store.commit('openDialog', {
-    //       message: `Discard unsaved changed?`,
-    //       callback: (value)=>{
-    //         if(value) {
-    //           self.$store.commit('closeItem', this.name);
-    //         }
-    //       }
-    //     });
-    //   } else {
-    //     this.$store.commit('closeItem', this.name);
-    //   }
-    // },
-    // save() {
-    //   const valid = this.$refs.form.validate()
-    //   console.log('valid', valid)
-    //   if(valid) {
-    //     this.$store.dispatch('saveItem', {name: this.name, close: false})
-    //   }
-    // },
-    // saveAndClose() {
-    //   const valid = this.$refs.form.validate()
-    //   console.log('valid', valid)
-    //   if(valid) {
-    //     this.$store.dispatch('saveItem', {name: this.name, close: true});
-    //   }
-    // },
+
     validate() {
       return this.$refs.form.validate()
     },
@@ -453,9 +323,6 @@ export default {
     }
   },
   computed:{
-    // hasPdf() {
-    //   return this.itemType == 'paper' && this.$store.state.pdfFiles[`${this.name}.pdf`]
-    // },
 
     supervisionItems() {
       return [
