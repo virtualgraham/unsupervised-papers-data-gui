@@ -12,7 +12,7 @@ import {
   writeFile,
   copyFile
 } from 'tauri/api/fs'
-import { execute } from 'tauri/api/process'
+// import { execute } from 'tauri/api/process'
 import * as matter from 'gray-matter';
 import utils from '../utils';
 
@@ -130,12 +130,6 @@ async function writeItem(item, dataDir) {
 
 Vue.use(Vuex)
 
-const typeMap = {
-  'task': 'tasks',
-  'category': 'categories',
-  'method': 'methods',
-  'paper': 'papers',
-}
 
 // function encodeKebobCase(str) {
 //   return str.replace(/[^0-9a-zA-Z]+/g, ' ').trim().replace(/([a-z])([A-Z])/g, '$1-$2').replace(/[-\s]+/g, '-').toLowerCase()
@@ -217,7 +211,7 @@ export default new Vuex.Store({
     },
 
     insertSavedItem(state, item) {
-      Vue.set(state[typeMap[item.type]], item.name, item)
+      Vue.set(state[utils.typeMap[item.type]], item.name, item)
     },
 
     insertOpenItem(state, {item, tab}) {
@@ -238,7 +232,7 @@ export default new Vuex.Store({
       if(Object.prototype.hasOwnProperty.call(state.openItems, itemKey)) { state.tabs.splice(state.tabs.indexOf(itemKey), 1) }
       console.log('removeItem', state.openTabName)
       Vue.delete(state.openItems, itemKey)
-      Vue.delete(state[typeMap[type]], name)
+      Vue.delete(state[utils.typeMap[type]], name)
     },
 
     addItem(state, type) {
@@ -325,8 +319,8 @@ export default new Vuex.Store({
     },
 
     openItem (state, {type, name}) {
-      if(state[typeMap[type]] && state[typeMap[type]][name]) {
-        const copy = JSON.parse(JSON.stringify(state[typeMap[type]][name]))
+      if(state[utils.typeMap[type]] && state[utils.typeMap[type]][name]) {
+        const copy = JSON.parse(JSON.stringify(state[utils.typeMap[type]][name]))
         copy.saved = true
         const itemKey = utils.itemKey(name, type)
         if(!Object.prototype.hasOwnProperty.call(state.openItems, itemKey)) { state.tabs.push(itemKey) }
@@ -421,14 +415,10 @@ export default new Vuex.Store({
     }
   },
   actions: {
-    async openPdf ({ commit, state }, name) {
-      if (!state.pdfDir) return
-      await execute('open', `${state.pdfDir}/${name}.pdf`)
-    },
 
     async removeItem ({ commit, dispatch, state }, {type, name}) {
       console.log('removeItem action', name)
-      const oldItem = state[typeMap[type]][name]
+      const oldItem = state[utils.typeMap[type]][name]
       commit('removeItem', {type, name})
       await removeItemFiles(getDir(oldItem, state.dataDir))
       await dispatch('removeReferences', {name, type})
@@ -622,7 +612,7 @@ export default new Vuex.Store({
       const item = JSON.parse(JSON.stringify(state.openItems[itemKey]))   
       delete item.saved
 
-      const oldItem = state[typeMap[type]][name]
+      const oldItem = state[utils.typeMap[type]][name]
 
       // TODO: check duplicate and invalid names
 
@@ -679,13 +669,13 @@ export default new Vuex.Store({
 
       let dest
       if(item.type == 'category' || item.type == 'task') {
-        dest = `${state.dataDir}/${typeMap[item.type]}/${item.frontmatter.area}/${item.name}/${item.name}`
+        dest = `${state.dataDir}/${utils.typeMap[item.type]}/${item.frontmatter.area}/${item.name}/${item.name}`
       } else {
-        dest = `${state.dataDir}/${typeMap[item.type]}/${item.name}/${item.name}`
+        dest = `${state.dataDir}/${utils.typeMap[item.type]}/${item.name}/${item.name}`
       }
 
       console.log('invoke processThumbnail', `${dest}-card.jpg`)
-      invoke({
+      await invoke({
         cmd: 'processThumbnail',
         src: imgPath, 
         dest: `${dest}-card.jpg`, 
@@ -695,7 +685,7 @@ export default new Vuex.Store({
       })
 
       console.log('invoke processThumbnail', `${dest}-thumb.jpg`)
-      invoke({
+      await invoke({
         cmd: 'processThumbnail',
         src: imgPath, 
         dest: `${dest}-thumb.jpg`, 

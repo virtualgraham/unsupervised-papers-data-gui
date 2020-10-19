@@ -18,9 +18,18 @@ function decodeItemKey(itemKey) {
     return {type: arr.length > 0 ? arr[0] : '', name: arr.length > 1 ? arr[1] : ''}
 }
 
+const typeMap = {
+    'task': 'tasks',
+    'category': 'categories',
+    'method': 'methods',
+    'paper': 'papers',
+  }
+
+  
 export default {
     decodeKebobCase,
     encodeKebobCase,
     itemKey,
-    decodeItemKey
+    decodeItemKey,
+    typeMap
 }

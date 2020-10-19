@@ -196,28 +196,53 @@
         </v-col>
       </v-row>
 
-      <!-- Thumbnail -->
-      <v-row>
-        <v-col cols="12">
-          <v-text-field
-            v-model="thumbnail"
-            label="Thumbnail Path"
-            type="text"
-          ></v-text-field>
-        </v-col>
-      </v-row>
 
-      <!-- Card -->
-      <v-row>
-        <v-col cols="12">
-          <v-text-field
-            v-model="card"
-            label="Card Path"
-            type="text"
-          ></v-text-field>
-        </v-col>
-      </v-row>
+      <v-sheet
+        class="pa-4 mb-6"
+        color="white"
+        elevation="1"
+      >
+        <!-- Thumbnail -->
+        <v-row>
+          <v-col cols="12">
+            <v-text-field
+              v-model="thumbnail"
+              label="Thumbnail Path"
+              type="text"
+              dense
+              hide-details="auto"
+            ></v-text-field>
+          </v-col>
+        </v-row>
 
+        <!-- Card -->
+        <v-row>
+          <v-col cols="12">
+            <v-text-field
+              v-model="card"
+              label="Card Path"
+              type="text"
+              dense
+              hide-details="auto"
+            ></v-text-field>
+          </v-col>
+        </v-row>
+
+        <v-row>
+          <v-col cols="12">
+            <v-btn
+              small
+              block
+              @click="processThumbnail"
+            >
+              Import Thumbnail
+            </v-btn>
+          </v-col>
+        </v-row>
+
+      </v-sheet>
+
+     
       <!-- s2_paper_id -->
       <v-row v-if="itemType == 'paper'">
         <v-col cols="12">
@@ -250,6 +275,7 @@
 
 import LinkListField from './LinkListField.vue'
 import utils from '../utils.js'
+import { open } from 'tauri/api/dialog'
 
 function computeFrontmatterProperty(field, {get, set}={get: undefined, set: undefined}) {
     return {
@@ -304,12 +330,18 @@ export default {
       return this.$refs.form.validate()
     },
 
-    // fillThumbnail() {
-    //   this.thumbnail = `${this.itemName}-thumb.jpg`
-    // },
-    // fillCard() {
-    //   this.card = `${this.itemName}-card.jpg`
-    // },
+    async processThumbnail() {
+      try {
+        this.$store.commit('setLoading', true);
+        console.log('processThumbnail')
+        const item = this.$store.state.openItems[this.itemKey]
+        const imgPath = await open({filter: 'png,jpg'})
+        console.log('imgPath', imgPath)
+        await this.$store.dispatch('processThumbnail', {imgPath, item})
+      } finally {
+        this.$store.commit('setLoading', false);
+      }
+    },
     async copyName() {
       try {
         await navigator.clipboard.writeText(this.titleKebob)

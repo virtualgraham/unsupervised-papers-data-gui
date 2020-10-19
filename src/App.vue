@@ -129,9 +129,11 @@
               outlined
               color="primary"
               dark
-              @click="processThumbnail"
+              @click="url"
             >
-              Thumbnail
+              <v-icon dark>
+                mdi-link-variant
+              </v-icon>
             </v-btn>
 
             <v-btn 
@@ -285,7 +287,8 @@
   import ItemList from './components/ItemList.vue'
   import ItemEditor from './components/ItemEditor.vue'
   import utils from './utils.js'
-  import { open } from 'tauri/api/dialog'
+  import { execute } from 'tauri/api/process'
+  // import { open } from 'tauri/api/dialog'
 
   export default {
     name: "app",
@@ -300,15 +303,21 @@
       }
     },
     methods: {
-      async processThumbnail() {
-        console.log('processThumbnail')
-        const item = this.$store.state.openItems[this.openTabName]
-        const imgPath = await open({filter: 'png,jpg'})
-        console.log('imgPath', imgPath)
-        this.$store.dispatch('processThumbnail', {imgPath, item})
+      async url() {
+        let url;
+
+        if(this.itemType == 'category') {
+          url = `http://unsupervisedpapers.com/methods/category/${this.itemName}`
+        } else {
+          url = `http://unsupervisedpapers.com/${this.itemType}/${this.itemName}`
+        }
+
+        console.log('openUrl', url)
+        await execute('open', url)
       },
-      pdf() {
-        this.$store.dispatch('openPdf', this.itemName)
+      async pdf() {
+        if (!this.$store.state.pdfDir) return
+        await execute('open', `${this.$store.state.pdfDir}/${this.itemName}.pdf`)
       },
       remove() {
         const self = this

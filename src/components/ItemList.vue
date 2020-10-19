@@ -33,13 +33,7 @@
 
 
 <script>
-
-const typeMap = {
-  'task': 'tasks',
-  'category': 'categories',
-  'method': 'methods',
-  'paper': 'papers',
-}
+import utils from '../utils';
 
 export default {
     name: 'ItemList',
@@ -95,7 +89,7 @@ export default {
     computed: {
         items: function() {
             const self = this
-            const items = Object.values(this.$store.state[typeMap[this.itemType]]).reduce(function(filtered, item) {
+            const items = Object.values(this.$store.state[utils.typeMap[this.itemType]]).reduce(function(filtered, item) {
                 if (!self.filter || self.filter.length == 0 || item.frontmatter.title.toLowerCase().includes(self.filter.toLowerCase())) {
                     filtered.push({ 
                         name: item.name, 
