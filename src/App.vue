@@ -124,6 +124,17 @@
             </div>
 
             <v-btn 
+              class="ml-4"
+              small
+              outlined
+              color="primary"
+              dark
+              @click="processThumbnail"
+            >
+              Thumbnail
+            </v-btn>
+
+            <v-btn 
               v-if="hasPdf"
               class="ml-4"
               small
@@ -274,6 +285,7 @@
   import ItemList from './components/ItemList.vue'
   import ItemEditor from './components/ItemEditor.vue'
   import utils from './utils.js'
+  import { open } from 'tauri/api/dialog'
 
   export default {
     name: "app",
@@ -288,6 +300,13 @@
       }
     },
     methods: {
+      async processThumbnail() {
+        console.log('processThumbnail')
+        const item = this.$store.state.openItems[this.openTabName]
+        const imgPath = await open({filter: 'png,jpg'})
+        console.log('imgPath', imgPath)
+        this.$store.dispatch('processThumbnail', {imgPath, item})
+      },
       pdf() {
         this.$store.dispatch('openPdf', this.itemName)
       },

@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import { v4 as uuidv4 } from 'uuid';
+import { invoke } from 'tauri/api/tauri'
 
 import { 
   readDir,
@@ -120,15 +121,10 @@ async function removeItemFiles(dir) {
 }
 
 async function writeItem(item, dataDir) {
- 
-  let dir = getDir(item, dataDir);
-
-  console.log('createDir', dir)
+  const dir = getDir(item, dataDir);
   await createDir(dir, {recursive: true})
-
   const raw = matter.stringify(item.content, item.frontmatter, {language: 'json'})
-
-  console.log('writeFile', `${dir}/${item.name}.md`)
+  console.log('writeItem', `${dir}/${item.name}.md`)
   await writeFile({path: `${dir}/${item.name}.md`, contents: raw})
 }
 
@@ -141,9 +137,9 @@ const typeMap = {
   'paper': 'papers',
 }
 
-function encodeKebobCase(str) {
-  return str.replace(/[^0-9a-zA-Z]+/g, ' ').trim().replace(/([a-z])([A-Z])/g, '$1-$2').replace(/[-\s]+/g, '-').toLowerCase()
-}
+// function encodeKebobCase(str) {
+//   return str.replace(/[^0-9a-zA-Z]+/g, ' ').trim().replace(/([a-z])([A-Z])/g, '$1-$2').replace(/[-\s]+/g, '-').toLowerCase()
+// }
 
 function removeFromList(arr, value) {
   for(let i=(arr.length-1); i>=0; i--) {
@@ -329,7 +325,6 @@ export default new Vuex.Store({
     },
 
     openItem (state, {type, name}) {
-
       if(state[typeMap[type]] && state[typeMap[type]][name]) {
         const copy = JSON.parse(JSON.stringify(state[typeMap[type]][name]))
         copy.saved = true
@@ -401,7 +396,6 @@ export default new Vuex.Store({
       state.loaded = value
     },
     setFrontmatterField (state, {itemKey, field, value}) {
-      //const {name, type} = utils.decodeItemKey(itemKey)
       console.log('setFrontmatterField', {itemKey, field, value})
       if(state.openItems[itemKey] && state.openItems[itemKey].frontmatter) {
         Vue.set(state.openItems[itemKey].frontmatter, field, value)
@@ -411,7 +405,6 @@ export default new Vuex.Store({
       }
     },
     setContent (state, {itemKey, value}) {
-      //const {name, type} = utils.decodeItemKey(itemKey)
       if(state.openItems[itemKey]) {
         Vue.set(state.openItems[itemKey], 'content', value)
         Vue.set(state.openItems[itemKey], 'saved', false)
@@ -420,7 +413,6 @@ export default new Vuex.Store({
       }
     },
     setSaved (state, {itemKey, value}) {
-      //const {name, type} = utils.decodeItemKey(itemKey)
       if(state.openItems[itemKey]) {
         Vue.set(state.openItems[itemKey], 'saved', value)
       } else {
@@ -429,7 +421,6 @@ export default new Vuex.Store({
     }
   },
   actions: {
-
     async openPdf ({ commit, state }, name) {
       if (!state.pdfDir) return
       await execute('open', `${state.pdfDir}/${name}.pdf`)
@@ -437,7 +428,6 @@ export default new Vuex.Store({
 
     async removeItem ({ commit, dispatch, state }, {type, name}) {
       console.log('removeItem action', name)
-
       const oldItem = state[typeMap[type]][name]
       commit('removeItem', {type, name})
       await removeItemFiles(getDir(oldItem, state.dataDir))
@@ -454,7 +444,6 @@ export default new Vuex.Store({
 
           if (type == 'task' && item.frontmatter.tasks.includes(name)) {
             if(!copy) { copy = JSON.parse(JSON.stringify(item)) }
-            copy.frontmatter.tasks.splice()
             removeFromList(copy.frontmatter.tasks, name)
             if (Object.prototype.hasOwnProperty.call(state.openItems, itemKey)) {
               removeFromList(state.openItems[itemKey].frontmatter.tasks, name)
@@ -644,14 +633,14 @@ export default new Vuex.Store({
         move = true
       }
 
-      if(encodeKebobCase(item.frontmatter.title) != name) {
+      if(utils.encodeKebobCase(item.frontmatter.title) != name) {
 
         if(item.file) {
           console.log('need to move files - item renamed')
           move = true
         }
         
-        item.name = encodeKebobCase(item.frontmatter.title)
+        item.name = utils.encodeKebobCase(item.frontmatter.title)
         
         renamed = oldItem && item.name != oldItem.name
 
@@ -684,6 +673,39 @@ export default new Vuex.Store({
         commit('setSaved', {itemKey: utils.itemKey(item.name, type) , value: true})
       }
       commit('openSnackbar', "Item Saved");
+    },
+
+    async processThumbnail({ commit, state }, {imgPath, item}) {
+
+      let dest
+      if(item.type == 'category' || item.type == 'task') {
+        dest = `${state.dataDir}/${typeMap[item.type]}/${item.frontmatter.area}/${item.name}/${item.name}`
+      } else {
+        dest = `${state.dataDir}/${typeMap[item.type]}/${item.name}/${item.name}`
+      }
+
+      console.log('invoke processThumbnail', `${dest}-card.jpg`)
+      invoke({
+        cmd: 'processThumbnail',
+        src: imgPath, 
+        dest: `${dest}-card.jpg`, 
+        width: 1200, 
+        height:628, 
+        fill:true
+      })
+
+      console.log('invoke processThumbnail', `${dest}-thumb.jpg`)
+      invoke({
+        cmd: 'processThumbnail',
+        src: imgPath, 
+        dest: `${dest}-thumb.jpg`, 
+        width: 500, 
+        height:320, 
+        fill:false
+      })
+
+      commit('setFrontmatterField', {itemKey: utils.itemKey(item.name, item.type), field: 'thumbnail', value: `${item.name}-thumb.jpg`}) 
+      commit('setFrontmatterField', {itemKey: utils.itemKey(item.name, item.type), field: 'card', value: `${item.name}-card.jpg`})
     },
 
     async loadData ({ commit, state }) {

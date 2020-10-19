@@ -5,6 +5,8 @@
 
 mod cmd;
 
+use cmd::process_thumbnail;
+
 fn main() {
   tauri::AppBuilder::new()
     .invoke_handler(|_webview, arg| {
@@ -16,12 +18,14 @@ fn main() {
         Ok(command) => {
           match command {
             // definitions for your custom commands from Cmd here
-            MyCustomCommand { argument } => {
+            ProcessThumbnail{ src, dest, width, height, fill } => {
               //  your command code
-              println!("{}", argument);
+              match process_thumbnail(&src, &dest, width, height, fill) {
+                Err(e) => Err(e.to_string()),
+                Ok(()) => Ok(())
+              }
             }
           }
-          Ok(())
         }
       }
     })

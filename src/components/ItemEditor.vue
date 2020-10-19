@@ -203,8 +203,6 @@
             v-model="thumbnail"
             label="Thumbnail Path"
             type="text"
-            append-outer-icon="mdi-pencil-box-outline"
-            @click:append-outer="fillThumbnail"
           ></v-text-field>
         </v-col>
       </v-row>
@@ -216,8 +214,6 @@
             v-model="card"
             label="Card Path"
             type="text"
-            append-outer-icon="mdi-pencil-box-outline"
-            @click:append-outer="fillCard"
           ></v-text-field>
         </v-col>
       </v-row>
@@ -307,12 +303,13 @@ export default {
     validate() {
       return this.$refs.form.validate()
     },
-    fillThumbnail() {
-      this.thumbnail = `${this.itemName}-thumb.jpg`
-    },
-    fillCard() {
-      this.card = `${this.itemName}-card.jpg`
-    },
+
+    // fillThumbnail() {
+    //   this.thumbnail = `${this.itemName}-thumb.jpg`
+    // },
+    // fillCard() {
+    //   this.card = `${this.itemName}-card.jpg`
+    // },
     async copyName() {
       try {
         await navigator.clipboard.writeText(this.titleKebob)
