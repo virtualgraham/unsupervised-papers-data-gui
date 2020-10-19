@@ -22,7 +22,7 @@
               </div>
             </v-expansion-panel-header>
             <v-expansion-panel-content>
-              <ItemList itemType="tasks" ref="tasksList" />
+              <ItemList itemType="task" ref="tasksList" />
             </v-expansion-panel-content>
           </v-expansion-panel>
           <v-expansion-panel @change="panelOpened('methodsList')">
@@ -44,7 +44,7 @@
               </div>
             </v-expansion-panel-header>
             <v-expansion-panel-content>
-              <ItemList itemType="methods" ref="methodsList" />
+              <ItemList itemType="method" ref="methodsList" />
             </v-expansion-panel-content>
           </v-expansion-panel>
           <v-expansion-panel @change="panelOpened('categoriesList')">
@@ -66,7 +66,7 @@
               </div>
             </v-expansion-panel-header>
             <v-expansion-panel-content>
-              <ItemList itemType="categories" ref="categoriesList" />
+              <ItemList itemType="category" ref="categoriesList" />
             </v-expansion-panel-content>
           </v-expansion-panel>
           <v-expansion-panel @change="panelOpened('papersList')">
@@ -88,7 +88,7 @@
               </div>
             </v-expansion-panel-header>
             <v-expansion-panel-content>
-              <ItemList itemType="papers" ref="papersList" />
+              <ItemList itemType="paper" ref="papersList" />
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-expansion-panels>

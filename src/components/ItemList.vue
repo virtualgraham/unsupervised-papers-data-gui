@@ -34,6 +34,13 @@
 
 <script>
 
+const typeMap = {
+  'task': 'tasks',
+  'category': 'categories',
+  'method': 'methods',
+  'paper': 'papers',
+}
+
 export default {
     name: 'ItemList',
     components: {
@@ -48,6 +55,7 @@ export default {
     },
     methods: {
         openItem(name) {
+            console.log('openItem', name, {type: this.itemType, name: name})
             this.$store.commit('openItem', {type: this.itemType, name: name}); 
         },
         opened() {
@@ -58,7 +66,7 @@ export default {
         },
         paperLabelsIcon(item) {
             // console.log('paperLabelsIcon', this.itemType, item)
-            if(this.itemType == 'papers') {
+            if(this.itemType == 'paper') {
                 let count = 0
 
                 if(item.frontmatter.supervision && item.frontmatter.supervision.length> 0) {
@@ -87,7 +95,7 @@ export default {
     computed: {
         items: function() {
             const self = this
-            const items = Object.values(this.$store.state[this.itemType]).reduce(function(filtered, item) {
+            const items = Object.values(this.$store.state[typeMap[this.itemType]]).reduce(function(filtered, item) {
                 if (!self.filter || self.filter.length == 0 || item.frontmatter.title.toLowerCase().includes(self.filter.toLowerCase())) {
                     filtered.push({ 
                         name: item.name, 

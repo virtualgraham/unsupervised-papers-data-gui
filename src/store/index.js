@@ -329,8 +329,9 @@ export default new Vuex.Store({
     },
 
     openItem (state, {type, name}) {
-      if(state[type] && state[type][name]) {
-        const copy = JSON.parse(JSON.stringify(state[type][name]))
+
+      if(state[typeMap[type]] && state[typeMap[type]][name]) {
+        const copy = JSON.parse(JSON.stringify(state[typeMap[type]][name]))
         copy.saved = true
         const itemKey = utils.itemKey(name, type)
         if(!Object.prototype.hasOwnProperty.call(state.openItems, itemKey)) { state.tabs.push(itemKey) }
