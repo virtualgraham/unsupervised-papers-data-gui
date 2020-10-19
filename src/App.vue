@@ -190,7 +190,7 @@
           >
             <Settings v-if="tab == '__settings__'"/>
             <v-card flat v-if="tab != '__settings__'">
-              <ItemEditor :name="tab" :ref="tab" />
+              <ItemEditor :itemKey="tab" :ref="tab" />
             </v-card>
           </v-tab-item>
         </v-tabs-items>
@@ -289,7 +289,7 @@
     },
     methods: {
       pdf() {
-        this.$store.dispatch('openPdf', this.openTabName)
+        this.$store.dispatch('openPdf', this.itemName)
       },
       remove() {
         const self = this
@@ -297,7 +297,7 @@
           message: `Permanently remove ${self.itemType}?`,
           callback: (value)=>{
             if(value) {
-              self.$store.dispatch('removeItem', this.openTabName)
+              self.$store.dispatch('removeItem', utils.decodeItemKey(this.openTabName))
             }
           }
         });
@@ -322,7 +322,8 @@
         const valid = this.$refs[this.openTabName][0].validate() // TODO FIX
         console.log('valid', valid)
         if(valid) {
-          this.$store.dispatch('saveItem', {name: this.openTabName, close: false})
+          const itemKey = utils.decodeItemKey(this.openTabName)
+          this.$store.dispatch('saveItem', {name: itemKey.name, type: itemKey.type, close: false})
         }
       },
       saveAndClose() {
@@ -330,7 +331,8 @@
         const valid = this.$refs[this.openTabName][0].validate() // TODO FIX
         console.log('valid', valid)
         if(valid) {
-          this.$store.dispatch('saveItem', {name: this.openTabName, close: true});
+          const itemKey = utils.decodeItemKey(this.openTabName)
+          this.$store.dispatch('saveItem', {name: itemKey.name, type: itemKey.type, close: true});
         }
       },
 
@@ -382,12 +384,15 @@
       itemTypeLabel: function() {
           return utils.decodeKebobCase(this.itemType)
       },
+      itemName: function() {
+          return this.openTabName == '__settings__' ? '' : utils.decodeItemKey(this.openTabName).name
+      },
       itemType: function() {
-          return this.openTabName == '__settings__' ? '' : this.$store.state.openItems[this.openTabName].type
+          return this.openTabName == '__settings__' ? '' : utils.decodeItemKey(this.openTabName).type
       },
       hasPdf() {
         if(this.openTabName == '__settings__') { return false }
-        return this.itemType == 'paper' && this.$store.state.pdfFiles[`${this.openTabName}.pdf`]
+        return this.itemType == 'paper' && this.$store.state.pdfFiles[`${this.itemName}.pdf`]
       },
 
 

@@ -13,6 +13,7 @@ import {
 } from 'tauri/api/fs'
 import { execute } from 'tauri/api/process'
 import * as matter from 'gray-matter';
+import utils from '../utils';
 
 async function readMarkdown(file) {
   try {
@@ -226,27 +227,30 @@ export default new Vuex.Store({
     insertOpenItem(state, {item, tab}) {
       const copy = JSON.parse(JSON.stringify(item))
       copy.saved = true
-      if(!Object.prototype.hasOwnProperty.call(state.openItems, copy.name)) { state.tabs.splice(tab, 0, copy.name) }
-      state.openTabName = copy.name
-      Vue.set(state.openItems, copy.name, copy)
 
+      const itemKey = utils.itemKey(copy.name, copy.type)
+
+      if(!Object.prototype.hasOwnProperty.call(state.openItems, itemKey)) { state.tabs.splice(tab, 0, itemKey) }
+      state.openTabName = itemKey
+      Vue.set(state.openItems, itemKey, copy)
     },
 
     removeItem(state, {name, type}) {
+      const itemKey = utils.itemKey(name, type)
 
-      state.openTabName = state.tabs.indexOf(name) == (state.tabs.length - 1) ? state.tabs[state.tabs.length - 2] : state.tabs[state.tabs.length - 1]
-
-      if(Object.prototype.hasOwnProperty.call(state.openItems, name)) { state.tabs.splice(state.tabs.indexOf(name), 1) }
+      state.openTabName = state.tabs.indexOf(itemKey) == (state.tabs.length - 1) ? state.tabs[state.tabs.length - 2] : state.tabs[state.tabs.length - 1]
+      if(Object.prototype.hasOwnProperty.call(state.openItems, itemKey)) { state.tabs.splice(state.tabs.indexOf(itemKey), 1) }
       console.log('removeItem', state.openTabName)
-      Vue.delete(state.openItems, name)
+      Vue.delete(state.openItems, itemKey)
       Vue.delete(state[typeMap[type]], name)
     },
 
     addItem(state, type) {
       const name = uuidv4()
+      const itemKey = utils.itemKey(name, type)
 
       if(type == 'paper') {
-        Vue.set(state.openItems, name, {
+        Vue.set(state.openItems, itemKey, {
           saved: false,
           file: null,
           type,
@@ -267,7 +271,7 @@ export default new Vuex.Store({
           content: ''
         })
       } else if (type == 'method') {
-        Vue.set(state.openItems, name, {
+        Vue.set(state.openItems, itemKey, {
           saved: false,
           file: null,
           type,
@@ -287,7 +291,7 @@ export default new Vuex.Store({
           content: ''
         })
       } else if (type == 'category') {
-        Vue.set(state.openItems, name, {
+        Vue.set(state.openItems, itemKey, {
           saved: false,
           file: null,
           type,
@@ -302,7 +306,7 @@ export default new Vuex.Store({
           content: ''
         })
       } else if (type == 'task') {
-        Vue.set(state.openItems, name, {
+        Vue.set(state.openItems, itemKey, {
           saved: false,
           file: null,
           type,
@@ -320,17 +324,18 @@ export default new Vuex.Store({
         })
       }
 
-      state.tabs.push(name)
-      state.openTabName = name
+      state.tabs.push(itemKey)
+      state.openTabName = itemKey
     },
 
     openItem (state, {type, name}) {
       if(state[type] && state[type][name]) {
         const copy = JSON.parse(JSON.stringify(state[type][name]))
         copy.saved = true
-        if(!Object.prototype.hasOwnProperty.call(state.openItems, name)) { state.tabs.push(name) }
-        state.openTabName = name
-        Vue.set(state.openItems, name, copy)
+        const itemKey = utils.itemKey(name, type)
+        if(!Object.prototype.hasOwnProperty.call(state.openItems, itemKey)) { state.tabs.push(itemKey) }
+        state.openTabName = itemKey
+        Vue.set(state.openItems, itemKey, copy)
       }
     },
 
@@ -360,13 +365,11 @@ export default new Vuex.Store({
       state.loading = value
     },
 
-    closeItem (state, name) {      
-      state.openTabName = state.tabs.indexOf(name) == (state.tabs.length - 1) ? state.tabs[state.tabs.length - 2] : state.tabs[state.tabs.length - 1]
-
+    closeItem (state, itemKey) {     
+      state.openTabName = state.tabs.indexOf(itemKey) == (state.tabs.length - 1) ? state.tabs[state.tabs.length - 2] : state.tabs[state.tabs.length - 1]
       console.log('closeItem state.openTabName', state.openTabName)
-      if(Object.prototype.hasOwnProperty.call(state.openItems, name)) { state.tabs.splice(state.tabs.indexOf(name), 1) }
-      Vue.delete(state.openItems, name)
-
+      if(Object.prototype.hasOwnProperty.call(state.openItems, itemKey)) { state.tabs.splice(state.tabs.indexOf(itemKey), 1) }
+      Vue.delete(state.openItems, itemKey)
     },
     setPdfFiles (state, value) {
       state.pdfFiles = value
@@ -396,28 +399,31 @@ export default new Vuex.Store({
     setLoaded (state, value) {
       state.loaded = value
     },
-    setFrontmatterField (state, {name, field, value}) {
-      console.log('setFrontmatterField', {name, field, value})
-      if(state.openItems[name] && state.openItems[name].frontmatter) {
-        Vue.set(state.openItems[name].frontmatter, field, value)
-        Vue.set(state.openItems[name], 'saved', false)
+    setFrontmatterField (state, {itemKey, field, value}) {
+      //const {name, type} = utils.decodeItemKey(itemKey)
+      console.log('setFrontmatterField', {itemKey, field, value})
+      if(state.openItems[itemKey] && state.openItems[itemKey].frontmatter) {
+        Vue.set(state.openItems[itemKey].frontmatter, field, value)
+        Vue.set(state.openItems[itemKey], 'saved', false)
       } else {
-        console.error('unable to set frontmatter field', {name, field, value})
+        console.error('unable to set frontmatter field', {itemKey, field, value})
       }
     },
-    setContent (state, {name, value}) {
-      if(state.openItems[name]) {
-        Vue.set(state.openItems[name], 'content', value)
-        Vue.set(state.openItems[name], 'saved', false)
+    setContent (state, {itemKey, value}) {
+      //const {name, type} = utils.decodeItemKey(itemKey)
+      if(state.openItems[itemKey]) {
+        Vue.set(state.openItems[itemKey], 'content', value)
+        Vue.set(state.openItems[itemKey], 'saved', false)
       } else {
-        console.error('unable to set content', {name, value})
+        console.error('unable to set content', {itemKey, value})
       }
     },
-    setSaved (state, {name, value}) {
-      if(state.openItems[name]) {
-        Vue.set(state.openItems[name], 'saved', value)
+    setSaved (state, {itemKey, value}) {
+      //const {name, type} = utils.decodeItemKey(itemKey)
+      if(state.openItems[itemKey]) {
+        Vue.set(state.openItems[itemKey], 'saved', value)
       } else {
-        console.error('unable to set saved on item', {name, value})
+        console.error('unable to set saved on item', {itemKey, value})
       }
     }
   },
@@ -428,198 +434,211 @@ export default new Vuex.Store({
       await execute('open', `${state.pdfDir}/${name}.pdf`)
     },
 
-    async removeItem ({ commit, dispatch, state }, name) {
+    async removeItem ({ commit, dispatch, state }, {type, name}) {
       console.log('removeItem action', name)
-      const type = state.openItems[name].type
+
       const oldItem = state[typeMap[type]][name]
       commit('removeItem', {type, name})
       await removeItemFiles(getDir(oldItem, state.dataDir))
-      await dispatch('removeReferences', name)
+      await dispatch('removeReferences', {name, type})
     },
 
-    async removeReferences ({ commit, state }, name) {
+    async removeReferences ({ commit, state }, {name, type}) {
 
-      for (const item of Object.values(state.papers)) {
+      if (type == 'task' || type == 'method') {
+        for (const item of Object.values(state.papers)) {
+          const itemKey = utils.itemKey(item.name, 'paper')
 
-        let copy;
+          let copy;
 
-        if (item.frontmatter.tasks.includes(name)) {
-          if(!copy) { copy = JSON.parse(JSON.stringify(item)) }
-          copy.frontmatter.tasks.splice()
-          removeFromList(copy.frontmatter.tasks, name)
-          if (Object.prototype.hasOwnProperty.call(state.openItems, item.name)) {
-            removeFromList(state.openItems[item.name].frontmatter.tasks, name)
+          if (type == 'task' && item.frontmatter.tasks.includes(name)) {
+            if(!copy) { copy = JSON.parse(JSON.stringify(item)) }
+            copy.frontmatter.tasks.splice()
+            removeFromList(copy.frontmatter.tasks, name)
+            if (Object.prototype.hasOwnProperty.call(state.openItems, itemKey)) {
+              removeFromList(state.openItems[itemKey].frontmatter.tasks, name)
+            }
+          }
+
+          if (type == 'method' && item.frontmatter.methods.includes(name)) {
+            if(!copy) { copy = JSON.parse(JSON.stringify(item)) }
+            removeFromList(copy.frontmatter.methods, name)
+            if (Object.prototype.hasOwnProperty.call(state.openItems, itemKey)) {
+              removeFromList(state.openItems[itemKey].frontmatter.methods, name)
+            }
+          }
+
+          if(copy) {
+            await writeItem(copy, state.dataDir)
+            commit('insertSavedItem', copy)
           }
         }
-
-        if (item.frontmatter.methods.includes(name)) {
-          if(!copy) { copy = JSON.parse(JSON.stringify(item)) }
-          removeFromList(copy.frontmatter.methods, name)
-          if (Object.prototype.hasOwnProperty.call(state.openItems, item.name)) {
-            removeFromList(state.openItems[item.name].frontmatter.methods, name)
-          }
-        }
-
-        if(copy) {
-          await writeItem(copy, state.dataDir)
-          commit('insertSavedItem', copy)
-        }
-
       }
 
-      for (const item of Object.values(state.methods)) {
+      if (type == 'category' || type == 'method' || type == 'paper') {
+        for (const item of Object.values(state.methods)) {
+          const itemKey = utils.itemKey(item.name, 'method')
 
-        let copy;
+          let copy;
 
-        if (item.frontmatter.categories.includes(name)) {
-          if(!copy) { copy = JSON.parse(JSON.stringify(item)) }
-          removeFromList(copy.frontmatter.categories, name)
-          if (Object.prototype.hasOwnProperty.call(state.openItems, item.name)) {
-            removeFromList(state.openItems[item.name].frontmatter.categories, name)
+          if (type == 'category' && item.frontmatter.categories.includes(name)) {
+            if(!copy) { copy = JSON.parse(JSON.stringify(item)) }
+            removeFromList(copy.frontmatter.categories, name)
+            if (Object.prototype.hasOwnProperty.call(state.openItems, itemKey)) {
+              removeFromList(state.openItems[itemKey].frontmatter.categories, name)
+            }
+          }
+
+          if (type == 'method' && item.frontmatter.components.includes(name)) {
+            if(!copy) { copy = JSON.parse(JSON.stringify(item)) }
+            removeFromList(copy.frontmatter.components, name)
+            if (Object.prototype.hasOwnProperty.call(state.openItems, itemKey)) {
+              removeFromList(state.openItems[itemKey].frontmatter.components, name)
+            }
+          }
+
+          if(type == 'paper' && item.frontmatter.introduced_by == name) {
+            if(!copy) { copy =JSON.parse(JSON.stringify(item)) }
+            copy.frontmatter.introduced_by = null
+            if (Object.prototype.hasOwnProperty.call(state.openItems, itemKey)) {
+              Vue.set(state.openItems[itemKey].frontmatter, 'introduced_by', null)
+            }
+          }
+
+          if(copy) {
+            await writeItem(copy, state.dataDir)
+            commit('insertSavedItem', copy)
           }
         }
-
-        if (item.frontmatter.components.includes(name)) {
-          if(!copy) { copy = JSON.parse(JSON.stringify(item)) }
-          removeFromList(copy.frontmatter.components, name)
-          if (Object.prototype.hasOwnProperty.call(state.openItems, item.name)) {
-            removeFromList(state.openItems[item.name].frontmatter.components, name)
-          }
-        }
-
-        if(item.frontmatter.introduced_by == name) {
-          if(!copy) { copy =JSON.parse(JSON.stringify(item)) }
-          copy.frontmatter.introduced_by = null
-          if (Object.prototype.hasOwnProperty.call(state.openItems, item.name)) {
-            Vue.set(state.openItems[item.name].frontmatter, 'introduced_by', null)
-          }
-        }
-
-        if(copy) {
-          await writeItem(copy, state.dataDir)
-          commit('insertSavedItem', copy)
-        }
-
       }
 
-      for (const item of Object.values(state.tasks)) {
+      if (type == 'task') {
+        for (const item of Object.values(state.tasks)) {
+          const itemKey = utils.itemKey(item.name, 'task')
 
-        let copy;
+          let copy;
 
-        if(item.frontmatter.parent_task == name) {
-          if(!copy) { copy = JSON.parse(JSON.stringify(item)) }
-          copy.frontmatter.parent_task = null
-          if (Object.prototype.hasOwnProperty.call(state.openItems, item.name)) {
-            Vue.set(state.openItems[item.name].frontmatter, 'parent_task', null)
+          if(type == 'task' && item.frontmatter.parent_task == name) {
+            if(!copy) { copy = JSON.parse(JSON.stringify(item)) }
+            copy.frontmatter.parent_task = null
+            if (Object.prototype.hasOwnProperty.call(state.openItems, itemKey)) {
+              Vue.set(state.openItems[itemKey].frontmatter, 'parent_task', null)
+            }
           }
-        }
 
-        if(copy) {
-          await writeItem(copy, state.dataDir)
-          commit('insertSavedItem', copy)
-        }
+          if(copy) {
+            await writeItem(copy, state.dataDir)
+            commit('insertSavedItem', copy)
+          }
 
+        }
       }
-
     },
 
-    async updateReferences ({ commit, state }, {oldName, newName}) {
+    async updateReferences ({ commit, state }, {oldName, newName, type}) {
 
-      for (const item of Object.values(state.papers)) {
+      if (type == 'task' || type == 'method') {
+        for (const item of Object.values(state.papers)) {
+          const itemKey = utils.itemKey(item.name, 'paper')
 
-        let copy;
+          let copy;
 
-        if (item.frontmatter.tasks.includes(oldName)) {
-          if(!copy) { copy = JSON.parse(JSON.stringify(item)) }
-          replace(copy.frontmatter.tasks, oldName, newName)
-          if (Object.prototype.hasOwnProperty.call(state.openItems, item.name)) {
-            replaceVueSet(state.openItems[item.name].frontmatter.tasks, oldName, newName)
+          if (type == 'task' && item.frontmatter.tasks.includes(oldName)) {
+            if(!copy) { copy = JSON.parse(JSON.stringify(item)) }
+            replace(copy.frontmatter.tasks, oldName, newName)
+            if (Object.prototype.hasOwnProperty.call(state.openItems, itemKey)) {
+              replaceVueSet(state.openItems[itemKey].frontmatter.tasks, oldName, newName)
+            }
+          }
+
+          if (type == 'method' && item.frontmatter.methods.includes(oldName)) {
+            if(!copy) { copy = JSON.parse(JSON.stringify(item)) }
+            replace(copy.frontmatter.methods, oldName, newName)
+            if (Object.prototype.hasOwnProperty.call(state.openItems, itemKey)) {
+              replaceVueSet(state.openItems[itemKey].frontmatter.methods, oldName, newName)
+            }
+          }
+
+          if(copy) {
+            await writeItem(copy, state.dataDir)
+            commit('insertSavedItem', copy)
           }
         }
-
-        if (item.frontmatter.methods.includes(oldName)) {
-          if(!copy) { copy = JSON.parse(JSON.stringify(item)) }
-          replace(copy.frontmatter.methods, oldName, newName)
-          if (Object.prototype.hasOwnProperty.call(state.openItems, item.name)) {
-            replaceVueSet(state.openItems[item.name].frontmatter.methods, oldName, newName)
-          }
-        }
-
-        if(copy) {
-          await writeItem(copy, state.dataDir)
-          commit('insertSavedItem', copy)
-        }
-
       }
 
-      for (const item of Object.values(state.methods)) {
+      if (type == 'category' || type == 'method' || type == 'paper') {
+        for (const item of Object.values(state.methods)) {
+          const itemKey = utils.itemKey(item.name, 'method')
 
-        let copy;
+          let copy;
 
-        if (item.frontmatter.categories.includes(oldName)) {
-          if(!copy) { copy = JSON.parse(JSON.stringify(item)) }
-          replace(copy.frontmatter.categories, oldName, newName)
-          if (Object.prototype.hasOwnProperty.call(state.openItems, item.name)) {
-            replaceVueSet(state.openItems[item.name].frontmatter.categories, oldName, newName)
+          if (type == 'category' && item.frontmatter.categories.includes(oldName)) {
+            if(!copy) { copy = JSON.parse(JSON.stringify(item)) }
+            replace(copy.frontmatter.categories, oldName, newName)
+            if (Object.prototype.hasOwnProperty.call(state.openItems, itemKey)) {
+              replaceVueSet(state.openItems[itemKey].frontmatter.categories, oldName, newName)
+            }
+          }
+
+          if (type == 'method' && item.frontmatter.components.includes(oldName)) {
+            if(!copy) { copy = JSON.parse(JSON.stringify(item)) }
+            replace(copy.frontmatter.components, oldName, newName)
+            if (Object.prototype.hasOwnProperty.call(state.openItems, itemKey)) {
+              replaceVueSet(state.openItems[itemKey].frontmatter.components, oldName, newName)
+            }
+          }
+
+          if(type == 'paper' && item.frontmatter.introduced_by == oldName) {
+            if(!copy) { copy =JSON.parse(JSON.stringify(item)) }
+            copy.frontmatter.introduced_by = newName
+            if (Object.prototype.hasOwnProperty.call(state.openItems, itemKey)) {
+              Vue.set(state.openItems[itemKey].frontmatter, 'introduced_by', newName)
+            }
+          }
+
+          if(copy) {
+            await writeItem(copy, state.dataDir)
+            commit('insertSavedItem', copy)
           }
         }
-
-        if (item.frontmatter.components.includes(oldName)) {
-          if(!copy) { copy = JSON.parse(JSON.stringify(item)) }
-          replace(copy.frontmatter.components, oldName, newName)
-          if (Object.prototype.hasOwnProperty.call(state.openItems, item.name)) {
-            replaceVueSet(state.openItems[item.name].frontmatter.components, oldName, newName)
-          }
-        }
-
-        if(item.frontmatter.introduced_by == oldName) {
-          if(!copy) { copy =JSON.parse(JSON.stringify(item)) }
-          copy.frontmatter.introduced_by = newName
-          if (Object.prototype.hasOwnProperty.call(state.openItems, item.name)) {
-            Vue.set(state.openItems[item.name].frontmatter, 'introduced_by', newName)
-          }
-        }
-
-        if(copy) {
-          await writeItem(copy, state.dataDir)
-          commit('insertSavedItem', copy)
-        }
-
       }
 
-      for (const item of Object.values(state.tasks)) {
+      if (type == 'task') {
+        for (const item of Object.values(state.tasks)) {
+          const itemKey = utils.itemKey(item.name, 'method')
 
-        let copy;
+          let copy;
 
-        if(item.frontmatter.parent_task == oldName) {
-          if(!copy) { copy = JSON.parse(JSON.stringify(item)) }
-          copy.frontmatter.parent_task = newName
-          if (Object.prototype.hasOwnProperty.call(state.openItems, item.name)) {
-            Vue.set(state.openItems[item.name].frontmatter, 'parent_task', newName)
+          if(type == 'task' && item.frontmatter.parent_task == oldName) {
+            if(!copy) { copy = JSON.parse(JSON.stringify(item)) }
+            copy.frontmatter.parent_task = newName
+            if (Object.prototype.hasOwnProperty.call(state.openItems, itemKey)) {
+              Vue.set(state.openItems[itemKey].frontmatter, 'parent_task', newName)
+            }
+          }
+
+          if(copy) {
+            await writeItem(copy, state.dataDir)
+            commit('insertSavedItem', copy)
           }
         }
-
-        if(copy) {
-          await writeItem(copy, state.dataDir)
-          commit('insertSavedItem', copy)
-        }
-
       }
-
     },
 
-    async saveItem ({ commit, dispatch, state }, {name, close}) {
+    async saveItem ({ commit, dispatch, state }, {name, type, close}) {
 
-      const item = JSON.parse(JSON.stringify(state.openItems[name]))   
+      const itemKey = utils.itemKey(name, type)
+
+      const item = JSON.parse(JSON.stringify(state.openItems[itemKey]))   
       delete item.saved
 
-      const oldItem = state[typeMap[item.type]][name]
+      const oldItem = state[typeMap[type]][name]
 
       // TODO: check duplicate and invalid names
 
       let move = false
       let renamed = false
-      if(oldItem && oldItem.frontmatter.area != item.frontmatter.area && (item.type == 'category' || item.type == 'task')) {
+      if(oldItem && oldItem.frontmatter.area != item.frontmatter.area && (type == 'category' || type == 'task')) {
         console.log('need to move files - area changed')
         move = true
       }
@@ -635,16 +654,16 @@ export default new Vuex.Store({
         
         renamed = oldItem && item.name != oldItem.name
 
-        const tab = state.tabs.indexOf(name)
+        const tab = state.tabs.indexOf(itemKey)
 
-        commit('removeItem', {type: item.type, name})
+        commit('removeItem', {type, name})
 
         if(!close) {
           commit('insertOpenItem', {item, tab})
         }
 
       } else if (close) {
-        commit('closeItem', name)
+        commit('closeItem', utils.itemKey(name, type))
       }
 
       await writeItem(item, state.dataDir)
@@ -656,12 +675,12 @@ export default new Vuex.Store({
         await removeItemFiles(getDir(oldItem, state.dataDir))
       }
 
-      if(renamed && (item.type == 'category' || item.type == 'task' || item.type == 'method')) {
-        await dispatch('updateReferences', {oldName: oldItem.name, newName: item.name})
+      if(renamed) {
+        await dispatch('updateReferences', {oldName: oldItem.name, newName: item.name, type: item.type})
       }
-
+      
       if(!close) {
-        commit('setSaved', {name: item.name , value: true})
+        commit('setSaved', {itemKey: utils.itemKey(item.name, type) , value: true})
       }
       commit('openSnackbar', "Item Saved");
     },

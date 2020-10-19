@@ -258,13 +258,13 @@ import utils from '../utils.js'
 function computeFrontmatterProperty(field, {get, set}={get: undefined, set: undefined}) {
     return {
       get: function() { 
-          const v = this.$store.state.openItems[this.name].frontmatter[field]; 
+          const v = this.$store.state.openItems[this.itemKey].frontmatter[field]; 
           return get ? get(v) : v
       }, 
       set: function(value) { 
           
           const v = set ? set(value) : value
-          this.$store.commit('setFrontmatterField', {name: this.name, field, value: v}); 
+          this.$store.commit('setFrontmatterField', {itemKey: this.itemKey, field, value: v}); 
       }
     }
 }
@@ -276,7 +276,7 @@ export default {
     LinkListField
   },
   props: {
-      name: {
+      itemKey: {
         type: String,
         required: true
       }
@@ -308,10 +308,10 @@ export default {
       return this.$refs.form.validate()
     },
     fillThumbnail() {
-      this.thumbnail = `${this.name}-thumb.jpg`
+      this.thumbnail = `${this.itemName}-thumb.jpg`
     },
     fillCard() {
-      this.card = `${this.name}-card.jpg`
+      this.card = `${this.itemName}-card.jpg`
     },
     async copyName() {
       try {
@@ -395,7 +395,13 @@ export default {
     },
 
     itemType: function() {
-        return this.$store.state.openItems[this.name].type
+      console.log('itemType', utils.decodeItemKey(this.itemKey).type)
+      return utils.decodeItemKey(this.itemKey).type
+    },
+
+    itemName: function() {
+      console.log('itemName', utils.decodeItemKey(this.itemKey).name)
+      return utils.decodeItemKey(this.itemKey).name
     },
 
     itemTypeLabel: function() {
@@ -455,10 +461,10 @@ export default {
 
     content: {
       get: function(){ 
-          return this.$store.state.openItems[this.name].content; 
+          return this.$store.state.openItems[this.itemKey].content; 
       }, 
       set: function(value){ 
-          this.$store.commit('setContent', {name: this.name, value}); 
+          this.$store.commit('setContent', {itemKey: this.itemKey, value}); 
       }
     },
 
