@@ -1,7 +1,7 @@
 <template>
   <v-form class="settings" ref="form" v-model="valid" lazy-validation  >
 
-    <v-container class="px-10 pt-0 pb-10" >
+    <v-container class="px-14 pt-4 pb-10" >
 
       <!-- Title -->
       <v-row>
@@ -12,6 +12,7 @@
             label="Title"
             type="text"
             required
+            hide-details="auto"
           ></v-text-field>
         </v-col>
       </v-row>
@@ -26,6 +27,7 @@
             readonly
             append-outer-icon="mdi-content-copy"
             @click:append-outer="copyName"
+            hide-details="auto"
           ></v-text-field>
         </v-col>
       </v-row>
@@ -36,7 +38,8 @@
           <v-text-field
             v-model="also_known_as"
             label="Also Known As"
-            type="text"            
+            type="text"     
+            hide-details="auto"       
           ></v-text-field>
         </v-col>
       </v-row>
@@ -50,6 +53,7 @@
             :items="areaItems"
             v-model="area"
             required
+            hide-details="auto"
           ></v-combobox>
         </v-col>
       </v-row>
@@ -61,6 +65,7 @@
             v-model="date"
             label="Date"
             type="text"
+            hide-details="auto"
           ></v-text-field>
         </v-col>
       </v-row>
@@ -72,6 +77,7 @@
             v-model="year"
             label="Year"
             type="text"
+            hide-details="auto"
           ></v-text-field>
         </v-col>
       </v-row>
@@ -86,6 +92,7 @@
             label="Categories"
             :items="categoryItems"
             v-model="categories"
+            hide-details="auto"
           ></v-autocomplete>
         </v-col>
       </v-row>
@@ -100,6 +107,7 @@
             label="Components"
             v-model="components"
             :items="methodItems"
+            hide-details="auto"
           ></v-autocomplete>
         </v-col>
       </v-row>
@@ -111,6 +119,7 @@
             label="Introduced By"
             v-model="introduced_by"
             :items="paperItems"
+            hide-details="auto"
           ></v-autocomplete>
         </v-col>
       </v-row>
@@ -122,6 +131,7 @@
             label="Parent Task"
             v-model="parent_task"
             :items="taskItems"
+            hide-details="auto"
           ></v-autocomplete>
         </v-col>
       </v-row>
@@ -133,6 +143,7 @@
             v-model="authors"
             label="Authors"
             type="text"
+            hide-details="auto"
           ></v-text-field>
         </v-col>
       </v-row>
@@ -143,12 +154,13 @@
           <v-textarea
             label="Abstract"
             v-model="abstract"
+            hide-details="auto"
           ></v-textarea>
         </v-col>
       </v-row>
 
       <!-- Links -->
-      <v-row v-if="itemType != 'category'">
+      <v-row v-if="itemType != 'category'" class="mt-4">
         <v-col cols="12">
           <LinkListField v-model="links" />
         </v-col>
@@ -164,6 +176,7 @@
             deletable-chips
             multiple
             :items="supervisionItems"
+            hide-details="auto"
           ></v-autocomplete>
         </v-col>
       </v-row>
@@ -178,6 +191,7 @@
             label="Tasks"
             v-model="tasks"
             :items="taskItems"
+            hide-details="auto"
           ></v-autocomplete>
         </v-col>
       </v-row>
@@ -192,51 +206,52 @@
             label="Methods"
             v-model="methods"
             :items="methodItems"
+            hide-details="auto"
           ></v-autocomplete>
         </v-col>
       </v-row>
 
 
-      <v-sheet
-        class="pa-6 mb-10 mt-5"
-        color="white"
-        elevation="2"
-      >
-        <!-- Thumbnail -->
-        <v-row>
-          <v-col cols="12">
-            <v-text-field
-              v-model="thumbnail"
-              label="Thumbnail Path"
-              type="text"
-            ></v-text-field>
-          </v-col>
-        </v-row>
+      <v-toolbar dense class="elevation-0 mt-2 mb-0 px-0" color="#f9f9f9">
+        <v-toolbar-title>Thumbnails</v-toolbar-title>
+        <v-spacer></v-spacer>
 
-        <!-- Card -->
-        <v-row>
-          <v-col cols="12">
-            <v-text-field
-              v-model="card"
-              label="Card Path"
-              type="text"
-            ></v-text-field>
-          </v-col>
-        </v-row>
+        <v-btn
+          small
+          color="primary"
+          dark
+          @click="processThumbnail"
+        >
+          Import Thumbnail
+        </v-btn>
+      </v-toolbar>
 
-        <v-row>
-          <v-col cols="12">
-            <v-btn
-              small
-              block
-              @click="processThumbnail"
-            >
-              Import Thumbnail
-            </v-btn>
-          </v-col>
-        </v-row>
+      <!-- Thumbnail -->
+      <v-row>
+        <v-col cols="12">
+          <v-text-field
+            v-model="thumbnail"
+            label="Thumbnail Path"
+            type="text"
+            hide-details="auto"
+          ></v-text-field>
+        </v-col>
+      </v-row>
 
-      </v-sheet>
+      <!-- Card -->
+      <v-row class="mb-10">
+        <v-col cols="12">
+          <v-text-field
+            v-model="card"
+            label="Card Path"
+            type="text"
+            hide-details="auto"
+          ></v-text-field>
+        </v-col>
+      </v-row>
+
+
+
 
      
       <!-- s2_paper_id -->
@@ -246,20 +261,22 @@
             v-model="s2_paper_id"
             label="S2 Paper ID"
             type="text"
+            hide-details="auto"
           ></v-text-field>
         </v-col>
       </v-row>
 
-      <!-- content -->
+      <!-- content markdown -->
       <v-row>
         <v-col cols="12">
           <v-textarea
             rows="15"
             @keyup.ctrl.76="console.log('ctrl-v')"
-            style="font-family: 'Lucida Console', Monaco, monospace"
+            class="markdown-font"
             outlined
             label="Content"
             v-model="content"
+            hide-details="auto"
           ></v-textarea>
         </v-col>
       </v-row>
@@ -503,6 +520,6 @@ export default {
 </script>
 
 
-<style scoped>
+<style>
 
 </style>

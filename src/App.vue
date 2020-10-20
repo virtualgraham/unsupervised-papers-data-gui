@@ -97,7 +97,7 @@
       <div class="content-tabs">
         <v-card>
           <v-tabs
-            background-color="#f0f0f0"
+            background-color="#f9f9f9"
             v-model="openTabIndex"
             center-active
           >
@@ -106,14 +106,14 @@
               v-for="tab in tabs"
               :key="tab"
             >
-              <span v-if="tab != '__settings__'" class="overline" style="line-height: 15px">{{title(tab)}}</span>
+              <span v-if="tab != '__settings__'" class="tab-font">{{title(tab)}}</span>
               <v-icon v-if="tab == '__settings__'">mdi-cog-outline</v-icon>
             </v-tab>
           </v-tabs>
         </v-card>
 
-        <v-container class="px-6 pt-1 pb-0" v-if="openTabName != '__settings__'">
-          <v-toolbar dense class="elevation-0">
+        <v-container class="px-10 pt-1 pb-0" v-if="openTabName != '__settings__'" style="max-width: unset; background-color: #f9f9f9">
+          <v-toolbar dense class="elevation-0" color="#f9f9f9">
             <v-toolbar-title>{{itemTypeLabel}}</v-toolbar-title>
 
             <v-spacer></v-spacer>
@@ -126,23 +126,38 @@
             <v-btn 
               class="ml-4"
               small
-              outlined
               color="primary"
               dark
-              @click="url"
+              outlined
+              @click="openDev"
             >
               <v-icon dark>
                 mdi-link-variant
               </v-icon>
+              Dev
+            </v-btn>
+
+            <v-btn 
+              class="ml-4"
+              small
+              color="primary"
+              dark
+              outlined
+              @click="openProd"
+            >
+              <v-icon dark>
+                mdi-link-variant
+              </v-icon>
+              Prod
             </v-btn>
 
             <v-btn 
               v-if="hasPdf"
               class="ml-4"
               small
-              outlined
               color="primary"
               dark
+              outlined
               @click="pdf"
             >
               PDF
@@ -151,8 +166,7 @@
             <v-btn
               class="ml-4"
               small
-              outlined
-              color="primary"
+              color="warning"
               dark
               @click="remove"
             >
@@ -164,7 +178,6 @@
             <v-btn
               class="ml-4"
               small
-              outlined
               color="primary"
               dark
               @click="save"
@@ -175,7 +188,6 @@
             <v-btn
               class="ml-4"
               small
-              outlined
               color="primary"
               dark
               @click="saveAndClose"
@@ -186,7 +198,6 @@
             <v-btn
               class="ml-4"
               small
-              outlined
               color="primary"
               dark
               @click="close"
@@ -303,17 +314,23 @@
       }
     },
     methods: {
-      async url() {
+      async openUrl(base) {
         let url;
 
         if(this.itemType == 'category') {
-          url = `http://unsupervisedpapers.com/methods/category/${this.itemName}`
+          url = `${base}/methods/category/${this.itemName}`
         } else {
-          url = `http://unsupervisedpapers.com/${this.itemType}/${this.itemName}`
+          url = `${base}/${this.itemType}/${this.itemName}`
         }
 
         console.log('openUrl', url)
         await execute('open', url)
+      },
+      async openProd() {
+        await this.openUrl('http://unsupervisedpapers.com')
+      },
+      async openDev() {
+        await this.openUrl('http://localhost:8000')
       },
       async pdf() {
         if (!this.$store.state.pdfDir) return
@@ -515,5 +532,7 @@
 .v-expansion-panel--active > .v-expansion-panel-header {
   min-height: 48px !important;
 }
+
+
 
 </style>

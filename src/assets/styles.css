@@ -5,3 +5,18 @@ body {
 html {
     overflow: hidden;
 }
+
+.markdown-font textarea {
+    font-family: 'Lucida Console', Monaco, monospace;
+    font-size: 13.5px; 
+    line-height: 20px;
+}
+
+.tab-font {
+    font-size: 0.6rem !important;
+    font-weight: 500;
+    letter-spacing: 0.085em !important;
+    line-height: 0.85rem;
+    text-transform: uppercase;
+    font-family: "Roboto", sans-serif !important;
+  }

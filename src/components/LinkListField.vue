@@ -1,13 +1,12 @@
 <template>
   <div class="d-flex flex-column">
-    <v-toolbar dense class="elevation-0 mb-2 px-0">
+    <v-toolbar dense class="elevation-0 mb-4 px-0" color="#f9f9f9">
       <v-toolbar-title>Links</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn
-        tile
-        dark
         small
-        color="green"
+        color="primary"
+        dark
         @click="add"
       >
         <v-icon>mdi-plus</v-icon>Add
