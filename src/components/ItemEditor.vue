@@ -198,9 +198,9 @@
 
 
       <v-sheet
-        class="pa-4 mb-6"
+        class="pa-6 mb-10 mt-5"
         color="white"
-        elevation="1"
+        elevation="2"
       >
         <!-- Thumbnail -->
         <v-row>
@@ -209,8 +209,6 @@
               v-model="thumbnail"
               label="Thumbnail Path"
               type="text"
-              dense
-              hide-details="auto"
             ></v-text-field>
           </v-col>
         </v-row>
@@ -222,8 +220,6 @@
               v-model="card"
               label="Card Path"
               type="text"
-              dense
-              hide-details="auto"
             ></v-text-field>
           </v-col>
         </v-row>
@@ -258,6 +254,7 @@
       <v-row>
         <v-col cols="12">
           <v-textarea
+            rows="15"
             @keyup.ctrl.76="console.log('ctrl-v')"
             style="font-family: 'Lucida Console', Monaco, monospace"
             outlined

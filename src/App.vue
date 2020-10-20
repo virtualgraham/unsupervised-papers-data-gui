@@ -503,6 +503,7 @@
 }
 
 .left-accordian {
+  background-color: rgb(240, 240, 240);;
   width: 300px;
 }
 

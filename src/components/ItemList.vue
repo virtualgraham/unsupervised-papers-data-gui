@@ -14,17 +14,32 @@
         <v-virtual-scroll
             ref="vscroll"
             height="calc(100vh - 242px)"
-            item-height="45"
+            item-height="32"
             :items="items"
         >
-            <template v-slot="{ item }">
-                <v-list-item :key="item.name" @click="openItem(item.name)">
-                    <v-list-item-content>
-                        <v-list-item-title>
-                            {{ item.paperLabelsIcon }}{{ item.title }}
-                        </v-list-item-title>
-                    </v-list-item-content>
-                </v-list-item>
+            <template v-slot="{ item }">         
+                <v-tooltip bottom open-delay="500">
+                    <template v-slot:activator="{ on, attrs }">
+                        <v-list-item 
+                            :key="item.name" 
+                            @click="openItem(item.name)" 
+                            style="min-height:32px" 
+                            v-bind="attrs"
+                            v-on="on"
+                        >
+                            <v-list-item-content class="py-0">
+                                <v-list-item-title style="text-align: left">
+                                    <span 
+                                        :class="item.complete ? '' : 'incompleteColor'"
+                                        style="font-size: 14px"
+                                    >{{ item.title }}</span>
+                            </v-list-item-title>
+                            </v-list-item-content>
+                        </v-list-item>
+
+                        </template>
+                        <span>{{ item.title }}</span>
+                </v-tooltip>
                 <v-divider></v-divider>
             </template>
         </v-virtual-scroll>
@@ -58,27 +73,28 @@ export default {
                 self.$refs.vscroll.onScroll()
             }, 200)
         },
-        paperLabelsIcon(item) {
-            // console.log('paperLabelsIcon', this.itemType, item)
+        isComplete(item) {
             if(this.itemType == 'paper') {
-                let count = 0
-
-                if(item.frontmatter.supervision && item.frontmatter.supervision.length> 0) {
-                    count += 1
-                } 
-                
-                if(item.frontmatter.tasks && item.frontmatter.tasks.length> 0) {
-                    count += 1
-                } 
-
-                if(item.frontmatter.methods && item.frontmatter.methods.length> 0) {
-                    count += 1
-                }
-
-                return count == 3 ? '☑ ' : '☐ '
+                return (item.frontmatter.supervision && item.frontmatter.supervision.length> 0) &&
+                    (item.frontmatter.tasks && item.frontmatter.tasks.length> 0) &&
+                    (item.frontmatter.methods && item.frontmatter.methods.length> 0)
             }
 
-            return ''
+            if(this.itemType == 'task') {
+                return (item.frontmatter.parent_task) &&
+                    (item.frontmatter.links && item.frontmatter.links.length> 0)
+            }
+
+            if(this.itemType == 'method') {
+                return (item.frontmatter.categories && item.frontmatter.categories.length> 0) &&
+                    (item.frontmatter.links && item.frontmatter.links.length> 0)
+            }
+
+            if(this.itemType == 'category') {
+                return (item.frontmatter.thumbnail) && (item.frontmatter.card)
+            }
+
+            return false
         },
     },
     watch: {
@@ -94,7 +110,7 @@ export default {
                     filtered.push({ 
                         name: item.name, 
                         title: item.frontmatter.title, 
-                        paperLabelsIcon: self.paperLabelsIcon(item)
+                        complete: self.isComplete(item)
                     });
                 }
                 return filtered;
@@ -108,6 +124,10 @@ export default {
 
 
 <style scoped>
+    .incompleteColor {
+        color:rgb(0,0,193);
+    }
+
     .item-list-container {
     height: 100%;
     }
