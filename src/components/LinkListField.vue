@@ -13,7 +13,7 @@
       </v-btn>
     </v-toolbar>
     <div class="d-flex flex-column">
-      <div v-for="(link, index) in links" :key="link.url" class="mb-5">
+      <div v-for="(link, index) in links" :key="link.url" class="mb-5 mx-2">
         <LinkField 
           :value="link" 
           @input="update($event, index)" 

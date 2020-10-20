@@ -212,7 +212,7 @@
       </v-row>
 
 
-      <v-toolbar dense class="elevation-0 mt-2 mb-0 px-0" color="#f9f9f9">
+      <v-toolbar dense class="elevation-0 mt-6 mb-0 px-0" color="#f9f9f9">
         <v-toolbar-title>Thumbnails</v-toolbar-title>
         <v-spacer></v-spacer>
 
@@ -227,7 +227,7 @@
       </v-toolbar>
 
       <!-- Thumbnail -->
-      <v-row>
+      <v-row class="mx-1">
         <v-col cols="12">
           <v-text-field
             v-model="thumbnail"
@@ -239,7 +239,7 @@
       </v-row>
 
       <!-- Card -->
-      <v-row class="mb-10">
+      <v-row class="mb-6 mx-1">
         <v-col cols="12">
           <v-text-field
             v-model="card"
@@ -255,7 +255,7 @@
 
      
       <!-- s2_paper_id -->
-      <v-row v-if="itemType == 'paper'">
+      <v-row v-if="itemType == 'paper'" class="mb-4">
         <v-col cols="12">
            <v-text-field
             v-model="s2_paper_id"

@@ -1,7 +1,26 @@
 <template>
   <v-form class="settings">
+
     <v-container class="pa-10">
+
       <v-row>
+        <v-col cols="12">
+          <v-toolbar dense class="elevation-0 mt-6 mb-0 px-0" color="#f9f9f9">
+            <v-toolbar-title>Data</v-toolbar-title>
+            <v-spacer></v-spacer>
+
+            <v-btn
+              color="primary"
+              dark
+              @click="loadData"
+            >
+              Load Data
+            </v-btn>
+          </v-toolbar>
+        </v-col>
+      </v-row>
+
+      <v-row class="mx-1">
         <v-col cols="12">
 
           <v-text-field
@@ -14,7 +33,7 @@
 
         </v-col>
       </v-row>
-      <v-row>
+      <v-row class="mx-1">
         <v-col cols="12">
 
           <v-text-field
@@ -27,17 +46,7 @@
 
         </v-col>
       </v-row>
-      <v-row>
-        <v-col cols="12">
-
-          <v-btn block
-            @click="loadData"
-          >
-            Load Data
-          </v-btn>
-
-        </v-col>
-      </v-row>
+     
     </v-container>
   </v-form>
 </template>
