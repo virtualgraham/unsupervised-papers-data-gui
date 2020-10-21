@@ -27,14 +27,14 @@ async function readMarkdown(file) {
   }
 }
 
-async function extractItemsFromDirFiles(dirFiles, type, area) {
+async function extractItemsFromDirFiles(dirFiles, type) {
     const items = []
     for(const f of dirFiles) {
       if(f.children) {
-        items.push(...(await extractItemsFromDirFiles(f.children, type, area)))
+        items.push(...(await extractItemsFromDirFiles(f.children, type)))
       } else {
         if(f.name.endsWith('.md')) {
-          const path = f.path.split('/')
+          // const path = f.path.split('/')
           const name = f.name.slice(0, -3)
           const itemData = await readMarkdown(f.path)
           const item = {
@@ -44,7 +44,7 @@ async function extractItemsFromDirFiles(dirFiles, type, area) {
             frontmatter: itemData.data,
             content: itemData.content
           }
-          if(area) item['area'] = path[path.length - 3]
+          // if(area) item['area'] = path[path.length - 3]
           items.push(item)
         }
       }
@@ -87,17 +87,19 @@ async function readPapers(dataDir) {
 }
 
 function getDir(item, dataDir) {
-  if(item.type == 'task') {
-    return `${dataDir}/tasks/${item.frontmatter.area}/${item.name}`
-  } else if (item.type == 'method') {
-    return `${dataDir}/methods/${item.name}`
-  } else if (item.type == 'category') {
-    return `${dataDir}/categories/${item.frontmatter.area}/${item.name}`
-  } else if (item.type == 'paper') {
-    return `${dataDir}/papers/${item.name}`
-  } else {
-    throw "getDir() error: invalid item type"
-  }
+  return `${dataDir}/${utils.typeMap[item.type]}/${item.name}`
+
+  // if(item.type == 'task') {
+  //   return `${dataDir}/tasks/${item.name}`
+  // } else if (item.type == 'method') {
+  //   return `${dataDir}/methods/${item.name}`
+  // } else if (item.type == 'category') {
+  //   return `${dataDir}/categories/${item.name}`
+  // } else if (item.type == 'paper') {
+  //   return `${dataDir}/papers/${item.name}`
+  // } else {
+  //   throw "getDir() error: invalid item type"
+  // }
 }
 
 async function moveAccompanyingFiles(from, to) {
@@ -667,28 +669,23 @@ export default new Vuex.Store({
 
     async processThumbnail({ commit, state }, {imgPath, item}) {
 
-      let dest
-      if(item.type == 'category' || item.type == 'task') {
-        dest = `${state.dataDir}/${utils.typeMap[item.type]}/${item.frontmatter.area}/${item.name}/${item.name}`
-      } else {
-        dest = `${state.dataDir}/${utils.typeMap[item.type]}/${item.name}/${item.name}`
-      }
+      const dir = getDir(item, state.dataDir)
 
-      console.log('invoke processThumbnail', `${dest}-card.jpg`)
+      console.log('invoke processThumbnail', `${dir}/${item.name}-card.jpg`)
       await invoke({
         cmd: 'processThumbnail',
         src: imgPath, 
-        dest: `${dest}-card.jpg`, 
+        dest: `${dir}/${item.name}-card.jpg`, 
         width: 1200, 
         height:628, 
         fill:true
       })
 
-      console.log('invoke processThumbnail', `${dest}-thumb.jpg`)
+      console.log('invoke processThumbnail', `${dir}/${item.name}-thumb.jpg`)
       await invoke({
         cmd: 'processThumbnail',
         src: imgPath, 
-        dest: `${dest}-thumb.jpg`, 
+        dest: `${dir}/${item.name}-thumb.jpg`, 
         width: 500, 
         height:320, 
         fill:false

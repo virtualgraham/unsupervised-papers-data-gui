@@ -119,8 +119,9 @@
             <v-spacer></v-spacer>
 
             <div>
+              <span v-if="isNew">New</span>
               <span v-if="saved">Saved</span>
-              <span v-if="!saved">Not Saved</span>
+              <span v-if="!isNew && !saved">Not Saved</span>
             </div>
 
             <v-btn 
@@ -420,6 +421,9 @@
     //   }
     // },
     computed: {
+      isNew() {
+        return !this.$store.state[utils.typeMap[this.itemType]][this.itemName]
+      },
       openTabName() {
         return this.$store.state.openTabName
       },

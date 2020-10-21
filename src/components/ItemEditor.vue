@@ -220,6 +220,7 @@
           small
           color="primary"
           dark
+          :disabled="isNew"
           @click="processThumbnail"
         >
           Import Thumbnail
@@ -339,11 +340,9 @@ export default {
     }
   },
   methods: {
-
     validate() {
       return this.$refs.form.validate()
     },
-
     async processThumbnail() {
       try {
         this.$store.commit('setLoading', true);
@@ -366,7 +365,9 @@ export default {
     }
   },
   computed:{
-
+    isNew() {
+      return !this.$store.state[utils.typeMap[this.itemType]][this.itemName]
+    },
     supervisionItems() {
       return [
         {
@@ -393,7 +394,7 @@ export default {
     },
 
     areaItems() {
-      const items = this.$store.getters[this.type == 'task' ? 'taskAreas' : 'methodAreas'].map(area => ({
+      const items = this.$store.getters[this.itemType == 'task' ? 'taskAreas' : 'methodAreas'].map(area => ({
         text: utils.decodeKebobCase(area),
         value: area
       }))
