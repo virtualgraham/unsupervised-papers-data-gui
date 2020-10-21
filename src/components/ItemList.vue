@@ -18,7 +18,7 @@
             :items="items"
         >
             <template v-slot="{ item }">         
-                <v-tooltip bottom open-delay="500">
+                <v-tooltip bottom open-delay="1000">
                     <template v-slot:activator="{ on, attrs }">
                         <v-list-item 
                             :key="item.name" 

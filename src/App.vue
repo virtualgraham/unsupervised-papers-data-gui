@@ -1,225 +1,231 @@
 <template>
   <v-app>
     <div id="app-inner">
-      <div class="left-accordian">
-        <v-expansion-panels accordion>
-          <v-expansion-panel @change="panelOpened('tasksList')">
-            <v-expansion-panel-header class="py-1">
-              <div class="add-button">
-                <div class="flex-grow-1">
-                  Tasks
-                </div>
-                <div>
-                  <v-btn
-                    icon
-                    :disabled="!loaded"
-                    color="green"
-                    @click="addTask"
-                  >
-                    <v-icon>mdi-plus</v-icon>
-                  </v-btn>
-                </div>
-              </div>
-            </v-expansion-panel-header>
-            <v-expansion-panel-content>
-              <ItemList itemType="task" ref="tasksList" />
-            </v-expansion-panel-content>
-          </v-expansion-panel>
-          <v-expansion-panel @change="panelOpened('methodsList')">
-            <v-expansion-panel-header class="py-1">
-              <div class="add-button">
-                <div class="flex-grow-1">
-                  Methods
-                </div>
-                <div>
-                  <v-btn
-                    icon
-                    :disabled="!loaded"
-                    color="green"
-                    @click="addMethod"
-                  >
-                    <v-icon>mdi-plus</v-icon>
-                  </v-btn>
-                </div>
-              </div>
-            </v-expansion-panel-header>
-            <v-expansion-panel-content>
-              <ItemList itemType="method" ref="methodsList" />
-            </v-expansion-panel-content>
-          </v-expansion-panel>
-          <v-expansion-panel @change="panelOpened('categoriesList')">
-            <v-expansion-panel-header class="py-1">
-              <div class="add-button">
-                <div class="flex-grow-1">
-                  Categories
-                </div>
-                <div>
-                  <v-btn
-                    icon
-                    :disabled="!loaded"
-                    color="green"
-                    @click="addCategory"
-                  >
-                    <v-icon>mdi-plus</v-icon>
-                  </v-btn>
-                </div>
-              </div>
-            </v-expansion-panel-header>
-            <v-expansion-panel-content>
-              <ItemList itemType="category" ref="categoriesList" />
-            </v-expansion-panel-content>
-          </v-expansion-panel>
-          <v-expansion-panel @change="panelOpened('papersList')">
-            <v-expansion-panel-header class="py-1">
-              <div class="add-button">
-                <div class="flex-grow-1">
-                  Papers
-                </div>
-                <div>
-                  <v-btn
-                    icon
-                    :disabled="!loaded"
-                    color="green"
-                    @click="addPaper"
-                  >
-                    <v-icon>mdi-plus</v-icon>
-                  </v-btn>
-                </div>
-              </div>
-            </v-expansion-panel-header>
-            <v-expansion-panel-content>
-              <ItemList itemType="paper" ref="papersList" />
-            </v-expansion-panel-content>
-          </v-expansion-panel>
-        </v-expansion-panels>
-      </div>
 
-      <div class="content-tabs">
-        <v-card>
-          <v-tabs
-            background-color="#f9f9f9"
-            v-model="openTabIndex"
-            center-active
-          >
-            <v-tabs-slider></v-tabs-slider>
-            <v-tab
-              v-for="tab in tabs"
-              :key="tab"
-            >
-              <span v-if="tab != '__settings__'" class="tab-font">{{title(tab)}}</span>
-              <v-icon v-if="tab == '__settings__'">mdi-cog-outline</v-icon>
-            </v-tab>
-          </v-tabs>
-        </v-card>
-
-        <v-container class="px-10 pt-1 pb-0" v-if="openTabName != '__settings__'" style="max-width: unset; background-color: #f9f9f9">
-          <v-toolbar dense class="elevation-0" color="#f9f9f9">
-            <v-toolbar-title>{{itemTypeLabel}}</v-toolbar-title>
-
-            <v-spacer></v-spacer>
-
-            <div>
-              <span v-if="isNew">New</span>
-              <span v-if="saved">Saved</span>
-              <span v-if="!isNew && !saved">Not Saved</span>
-            </div>
-
-            <v-btn 
-              class="ml-4"
-              small
-              color="primary"
-              dark
-              outlined
-              @click="openDev"
-            >
-              <v-icon dark>
-                mdi-link-variant
-              </v-icon>
-              Dev
-            </v-btn>
-
-            <v-btn 
-              class="ml-4"
-              small
-              color="primary"
-              dark
-              outlined
-              @click="openProd"
-            >
-              <v-icon dark>
-                mdi-link-variant
-              </v-icon>
-              Prod
-            </v-btn>
-
-            <v-btn 
-              v-if="hasPdf"
-              class="ml-4"
-              small
-              color="primary"
-              dark
-              outlined
-              @click="pdf"
-            >
-              PDF
-            </v-btn>
-
-            <v-btn
-              class="ml-4"
-              small
-              color="warning"
-              dark
-              @click="remove"
-            >
-              Remove
-            </v-btn>
-
-
-
-            <v-btn
-              class="ml-4"
-              small
-              color="primary"
-              dark
-              @click="save"
-            >
-              Save
-            </v-btn>
-
-            <v-btn
-              class="ml-4"
-              small
-              color="primary"
-              dark
-              @click="saveAndClose"
-            >
-              Save &amp; Close
-            </v-btn>
-
-            <v-btn
-              class="ml-4"
-              small
-              color="primary"
-              dark
-              @click="close"
-            >
-              Close
-            </v-btn>
-          </v-toolbar>
-        </v-container>
-
-        <v-tabs-items v-model="openTabIndex" style="height: calc(100vh - 100px); overflow: auto">
-          <v-tab-item
-            v-for="tab in tabs"
-            :key="tab"
-          >
-            <Settings v-if="tab == '__settings__'"/>
-            <v-card flat v-if="tab != '__settings__'">
-              <ItemEditor :itemKey="tab" :ref="tab" />
+      <splitpanes class="default-theme">
+        <pane size="25">
+          <div class="left-accordian">
+            <v-expansion-panels accordion>
+              <v-expansion-panel @change="panelOpened('tasksList')">
+                <v-expansion-panel-header class="py-1">
+                  <div class="add-button">
+                    <div class="flex-grow-1">
+                      Tasks
+                    </div>
+                    <div>
+                      <v-btn
+                        icon
+                        :disabled="!loaded"
+                        color="green"
+                        @click="addTask"
+                      >
+                        <v-icon>mdi-plus</v-icon>
+                      </v-btn>
+                    </div>
+                  </div>
+                </v-expansion-panel-header>
+                <v-expansion-panel-content>
+                  <ItemList itemType="task" ref="tasksList" />
+                </v-expansion-panel-content>
+              </v-expansion-panel>
+              <v-expansion-panel @change="panelOpened('methodsList')">
+                <v-expansion-panel-header class="py-1">
+                  <div class="add-button">
+                    <div class="flex-grow-1">
+                      Methods
+                    </div>
+                    <div>
+                      <v-btn
+                        icon
+                        :disabled="!loaded"
+                        color="green"
+                        @click="addMethod"
+                      >
+                        <v-icon>mdi-plus</v-icon>
+                      </v-btn>
+                    </div>
+                  </div>
+                </v-expansion-panel-header>
+                <v-expansion-panel-content>
+                  <ItemList itemType="method" ref="methodsList" />
+                </v-expansion-panel-content>
+              </v-expansion-panel>
+              <v-expansion-panel @change="panelOpened('categoriesList')">
+                <v-expansion-panel-header class="py-1">
+                  <div class="add-button">
+                    <div class="flex-grow-1">
+                      Categories
+                    </div>
+                    <div>
+                      <v-btn
+                        icon
+                        :disabled="!loaded"
+                        color="green"
+                        @click="addCategory"
+                      >
+                        <v-icon>mdi-plus</v-icon>
+                      </v-btn>
+                    </div>
+                  </div>
+                </v-expansion-panel-header>
+                <v-expansion-panel-content>
+                  <ItemList itemType="category" ref="categoriesList" />
+                </v-expansion-panel-content>
+              </v-expansion-panel>
+              <v-expansion-panel @change="panelOpened('papersList')">
+                <v-expansion-panel-header class="py-1">
+                  <div class="add-button">
+                    <div class="flex-grow-1">
+                      Papers
+                    </div>
+                    <div>
+                      <v-btn
+                        icon
+                        :disabled="!loaded"
+                        color="green"
+                        @click="addPaper"
+                      >
+                        <v-icon>mdi-plus</v-icon>
+                      </v-btn>
+                    </div>
+                  </div>
+                </v-expansion-panel-header>
+                <v-expansion-panel-content>
+                  <ItemList itemType="paper" ref="papersList" />
+                </v-expansion-panel-content>
+              </v-expansion-panel>
+            </v-expansion-panels>
+          </div>
+        </pane>
+        <pane style="background-color: white;">
+          <div class="content-tabs">
+            <v-card>
+              <v-tabs
+                background-color="#f9f9f9"
+                v-model="openTabIndex"
+                center-active
+              >
+                <v-tabs-slider></v-tabs-slider>
+                <v-tab
+                  v-for="tab in tabs"
+                  :key="tab"
+                >
+                  <span v-if="tab != '__settings__'" class="tab-font">{{title(tab)}}</span>
+                  <v-icon v-if="tab == '__settings__'">mdi-cog-outline</v-icon>
+                </v-tab>
+              </v-tabs>
             </v-card>
-          </v-tab-item>
-        </v-tabs-items>
-      </div>
+
+            <v-container class="px-10 pt-1 pb-0" v-if="openTabName != '__settings__'" style="max-width: unset; background-color: #f9f9f9">
+              <v-toolbar dense class="elevation-0" color="#f9f9f9">
+                <v-toolbar-title>{{itemTypeLabel}}</v-toolbar-title>
+
+                <v-spacer></v-spacer>
+
+                <div>
+                  <span v-if="isNew">New</span>
+                  <span v-if="saved">Saved</span>
+                  <span v-if="!isNew && !saved">Not Saved</span>
+                </div>
+
+                <v-btn 
+                  class="ml-4"
+                  small
+                  color="primary"
+                  dark
+                  outlined
+                  @click="openDev"
+                >
+                  <v-icon dark>
+                    mdi-link-variant
+                  </v-icon>
+                  Dev
+                </v-btn>
+
+                <v-btn 
+                  class="ml-4"
+                  small
+                  color="primary"
+                  dark
+                  outlined
+                  @click="openProd"
+                >
+                  <v-icon dark>
+                    mdi-link-variant
+                  </v-icon>
+                  Prod
+                </v-btn>
+
+                <v-btn 
+                  v-if="hasPdf"
+                  class="ml-4"
+                  small
+                  color="primary"
+                  dark
+                  outlined
+                  @click="pdf"
+                >
+                  PDF
+                </v-btn>
+
+                <v-btn
+                  class="ml-4"
+                  small
+                  color="warning"
+                  dark
+                  @click="remove"
+                >
+                  Remove
+                </v-btn>
+
+
+
+                <v-btn
+                  class="ml-4"
+                  small
+                  color="primary"
+                  dark
+                  @click="save"
+                >
+                  Save
+                </v-btn>
+
+                <v-btn
+                  class="ml-4"
+                  small
+                  color="primary"
+                  dark
+                  @click="saveAndClose"
+                >
+                  Save &amp; Close
+                </v-btn>
+
+                <v-btn
+                  class="ml-4"
+                  small
+                  color="primary"
+                  dark
+                  @click="close"
+                >
+                  Close
+                </v-btn>
+              </v-toolbar>
+            </v-container>
+
+            <v-tabs-items v-model="openTabIndex" style="height: calc(100vh - 100px); overflow: auto">
+              <v-tab-item
+                v-for="tab in tabs"
+                :key="tab"
+              >
+                <Settings v-if="tab == '__settings__'"/>
+                <v-card flat v-if="tab != '__settings__'">
+                  <ItemEditor :itemKey="tab" :ref="tab" />
+                </v-card>
+              </v-tab-item>
+            </v-tabs-items>
+          </div>
+        </pane>
+      </splitpanes>
 
     </div>
 
@@ -301,10 +307,14 @@
   import utils from './utils.js'
   import { execute } from 'tauri/api/process'
   // import { open } from 'tauri/api/dialog'
+  import { Splitpanes, Pane } from 'splitpanes'
+  import 'splitpanes/dist/splitpanes.css'
 
   export default {
     name: "app",
     components: {
+      Splitpanes,
+      Pane,
       Settings,
       ItemList,
       ItemEditor
@@ -520,12 +530,11 @@
 }
 
 .content-tabs {
-  flex: 1;
+  
 }
 
 .left-accordian {
   background-color: rgb(240, 240, 240);;
-  width: 300px;
 }
 
 .v-expansion-panel-content__wrap {

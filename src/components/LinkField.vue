@@ -1,43 +1,30 @@
 <template>
-  <v-sheet height="130" outlined class="d-flex flex-column px-4 pt-6 pb-2">
+  <v-sheet height="185" outlined class="d-flex flex-column px-4 pt-6 pb-2">
     <div class="d-flex">
-      <div class="mr-4 flex-grow-1">
+      <div class="mr-4" style="width: 180px">
+        <v-select
+          :items="icons"
+          label="Icon"
+          dense
+          v-model="icon" 
+          @input="update"
+        ></v-select>
+      </div>
+      <div class="mr-4" style="width: 220px">
         <v-text-field 
-          ref="titleField"
+          label="Resource" 
+          dense
+          v-model="resource" 
+          @input="update"
+        ></v-text-field>
+      </div>
+      <div class="flex-grow-1">
+        <v-text-field 
           label="Title" 
           dense
           v-model="title" 
           @input="update"
         ></v-text-field>
-      </div>
-      <div class="mr-4" style="width: 200px">
-        <v-select
-          ref="typeField"
-          :items="types"
-          label="Type"
-          dense
-          v-model="type" 
-          @input="update"
-        ></v-select>
-
-      </div>
-      <div class="flex-grow-0">
-        <v-btn
-          icon
-          color="red"
-          @click="remove"
-        >
-          <v-icon>mdi-delete-outline</v-icon>
-        </v-btn>
-      </div>
-      <div class="flex-grow-0">
-        <v-btn
-          icon
-          color="blue"
-          @click="down"
-        >
-          <v-icon>mdi-arrow-down</v-icon>
-        </v-btn>
       </div>
       <div class="flex-grow-0">
         <v-btn
@@ -51,12 +38,37 @@
     </div>
     <div class="d-flex">
       <v-text-field
-        ref="urlField" 
         label="URL" 
         dense 
         v-model="url"
         @input="update"
       ></v-text-field>
+      <div class="flex-grow-0">
+        <v-btn
+          icon
+          color="blue"
+          @click="down"
+        >
+          <v-icon>mdi-arrow-down</v-icon>
+        </v-btn>
+      </div>
+    </div>
+    <div class="d-flex">
+      <v-text-field
+        label="Description" 
+        dense 
+        v-model="description"
+        @input="update"
+      ></v-text-field>
+      <div class="flex-grow-0">
+        <v-btn
+          icon
+          color="red"
+          @click="remove"
+        >
+          <v-icon>mdi-delete-outline</v-icon>
+        </v-btn>
+      </div>
     </div>
   </v-sheet>
 </template>
@@ -68,7 +80,9 @@ export default {
   data() {
     return {
       title: this.value.title,
-      type: this.value.type,
+      resource: this.value.resource,
+      description: this.value.description,
+      icon: this.value.icon,
       url: this.value.url
     }
   },
@@ -97,7 +111,9 @@ export default {
       this.$emit("input", 
         {
           title: this.title,
-          type: this.type,
+          resource: this.resource,
+          description: this.description,
+          icon: this.icon,
           url: this.url,
         }
       );
@@ -105,7 +121,7 @@ export default {
   },
 
   computed: {
-    types() {
+    icons() {
       return [
         {
           text: 'PDF',
