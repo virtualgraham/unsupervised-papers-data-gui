@@ -335,7 +335,14 @@
         }
 
         console.log('openUrl', url)
-        await execute('open', url)
+
+        const os = utils.getOS()
+
+        if(os == 'Linux') {
+          await execute('xdg-open', url)
+        } else if (os == 'Mac OS') {
+          await execute('open', url)
+        }
       },
       async openProd() {
         await this.openUrl('http://unsupervisedpapers.com')
