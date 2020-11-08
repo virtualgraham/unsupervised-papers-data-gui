@@ -86,11 +86,15 @@ export default {
       url: this.value.url
     }
   },
-
-  created() {
-
+  watch: {
+    icon(val) {
+      if (val == 'website') {
+        this.resource = ''
+      } else {
+        this.resource = this.icons.find(i => i.value == val).text
+      }
+    }
   },
-
   methods: {
     remove() {
       this.$emit("remove", {

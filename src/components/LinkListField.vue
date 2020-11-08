@@ -43,21 +43,20 @@ export default {
   },
   methods: {
     add() {
-      console.log('add')
       this.links.push({
         title: '',
+        resource: '',
+        description: '',
         url: '',
-        type: 'website'
+        icon: 'website'
       })
       this.$emit("input", this.links);
     },
     remove(e) {
-      console.log('remove', e.index)
       this.$delete(this.links, e.index)
       this.$emit("input", this.links);
     },
     up(e) {
-      console.log('up', e.index)
       if(e.index == 0) return
       const a = this.links[e.index]
       const b = this.links[e.index - 1]
@@ -66,7 +65,6 @@ export default {
       this.$emit("input", this.links);
     },
     down(e) {
-      console.log('down', e.index)
       if(e.index == this.links.length-1) return
       const a = this.links[e.index]
       const b = this.links[e.index + 1]
