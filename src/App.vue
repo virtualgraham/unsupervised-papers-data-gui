@@ -5,8 +5,8 @@
       <splitpanes class="default-theme">
         <pane size="25">
           <div class="left-accordian">
-            <v-expansion-panels accordion>
-              <v-expansion-panel @change="panelOpened('tasksList')">
+            <v-expansion-panels accordion v-model="expandedPanels">
+              <v-expansion-panel @change="panelOpened('tasksList')" :key="0">
                 <v-expansion-panel-header class="py-1">
                   <div class="add-button">
                     <div class="flex-grow-1">
@@ -28,7 +28,7 @@
                   <ItemList itemType="task" ref="tasksList" />
                 </v-expansion-panel-content>
               </v-expansion-panel>
-              <v-expansion-panel @change="panelOpened('methodsList')">
+              <v-expansion-panel @change="panelOpened('methodsList')" :key="1">
                 <v-expansion-panel-header class="py-1">
                   <div class="add-button">
                     <div class="flex-grow-1">
@@ -50,7 +50,7 @@
                   <ItemList itemType="method" ref="methodsList" />
                 </v-expansion-panel-content>
               </v-expansion-panel>
-              <v-expansion-panel @change="panelOpened('categoriesList')">
+              <v-expansion-panel @change="panelOpened('categoriesList')" :key="2">
                 <v-expansion-panel-header class="py-1">
                   <div class="add-button">
                     <div class="flex-grow-1">
@@ -72,7 +72,7 @@
                   <ItemList itemType="category" ref="categoriesList" />
                 </v-expansion-panel-content>
               </v-expansion-panel>
-              <v-expansion-panel @change="panelOpened('papersList')">
+              <v-expansion-panel @change="panelOpened('papersList')" :key="3">
                 <v-expansion-panel-header class="py-1">
                   <div class="add-button">
                     <div class="flex-grow-1">
@@ -321,6 +321,7 @@
     },
     data() {
       return {
+        expandedPanels: 3,
         paperFilter: '',
       }
     },

@@ -13,7 +13,7 @@
       </v-btn>
     </v-toolbar>
     <div class="d-flex flex-column">
-      <div v-for="(link, index) in links" :key="link.url" class="mb-5 mx-2">
+      <div v-for="(link, index) in links" :key="linkHash(link)" class="mb-5 mx-2">
         <LinkField 
           :value="link" 
           @input="update($event, index)" 
@@ -42,6 +42,9 @@ export default {
     LinkField
   },
   methods: {
+    linkHash(link) {
+      return link.title + link.resource + link.description + link.icon + link.url
+    },
     add() {
       this.links.push({
         title: '',

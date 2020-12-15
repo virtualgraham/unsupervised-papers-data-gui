@@ -11,11 +11,20 @@
                 prepend-inner-icon="mdi-filter-outline"
             ></v-text-field>
         </div>
+        <div v-if="items.length == 0">
+            <div v-if="!loaded">
+                No Data Loaded
+            </div>
+            <div v-if="loaded">
+                No Items
+            </div>            
+        </div>
         <v-virtual-scroll
             ref="vscroll"
             height="calc(100vh - 242px)"
             item-height="32"
             :items="items"
+            v-if="items.length > 0"
         >
             <template v-slot="{ item }">         
                 <v-tooltip bottom open-delay="1000">
@@ -70,7 +79,9 @@ export default {
         opened() {
             const self = this
             setTimeout(function () {
-                self.$refs.vscroll.onScroll()
+                if (self.items.length > 0) {
+                    self.$refs.vscroll.onScroll()
+                }
             }, 200)
         },
         isComplete(item) {
@@ -103,6 +114,9 @@ export default {
         }
     },
     computed: {
+        loaded: function() {
+            return this.$store.state.loaded
+        },
         items: function() {
             const self = this
             const items = Object.values(this.$store.state[utils.typeMap[this.itemType]]).reduce(function(filtered, item) {

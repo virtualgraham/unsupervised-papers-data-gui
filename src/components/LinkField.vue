@@ -7,7 +7,7 @@
           label="Icon"
           dense
           v-model="icon" 
-          @input="update"
+          @input="updateIcon"
         ></v-select>
       </div>
       <div class="mr-4" style="width: 220px">
@@ -86,15 +86,7 @@ export default {
       url: this.value.url
     }
   },
-  watch: {
-    icon(val) {
-      if (val == 'website') {
-        this.resource = ''
-      } else {
-        this.resource = this.icons.find(i => i.value == val).text
-      }
-    }
-  },
+
   methods: {
     remove() {
       this.$emit("remove", {
@@ -111,7 +103,16 @@ export default {
         index: this.index
       })
     },
-    update(e) {
+    updateIcon(val) {
+      if (val == 'website') {
+        this.resource = ''
+      } else {
+        this.resource = this.icons.find(i => i.value == val).text
+      }
+      this.update()
+    },
+    update() {
+      console.log("update")
       this.$emit("input", 
         {
           title: this.title,
